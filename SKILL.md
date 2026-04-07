@@ -1,10 +1,10 @@
 ---
 name: agent-lessons-router
-description: 專案的架構決策與歷史踩坑紀錄（Gotchas）。在執行任何架構修改、API 串接或 Debug 任務前，必須先透過此 Skill 檢索相關上下文。同時規範了如何將新經驗寫入本地知識庫。
-tags: [workflow, architecture, knowledge-base, memory]
+description: 專案的架構決策與歷史踩坑紀錄（Gotchas）。支援使用 `/alr` 或 `alr` 快速觸發。在執行任何架構修改、API 串接或 Debug 任務前，必須先透過此 Skill 檢索相關上下文。同時規範了如何將新經驗寫入本地知識庫。
+tags: [workflow, architecture, knowledge-base, memory, alr]
 ---
 
-# Agent-Lessons-Router
+# Agent-Lessons-Router (ALR)
 
 本專案採用「漸進式揭露 (Progressive Disclosure)」來管理 AI 上下文。你**絕對不能**憑空猜測系統架構或過去的決策，也**絕對不能**在未經驗證的情況下隨意新增經驗。
 
@@ -40,12 +40,18 @@ bash <SKILL_DIR>/scripts/install.sh
 
 ---
 
-## Phase 2: 寫入與學習 (Learn / Post-task)
+## Phase 2: 審查與自省 (Review / Post-execution)
 
-當任務結束且需要記錄經驗時，讀取 `<SKILL_DIR>/docs/learn.md` 並遵循其中的完整寫入 SOP。
+在實作進入收尾階段前，你必須讀取 `<SKILL_DIR>/docs/review.md`，並強制進入自我審核（或開啟 Subagent 審核）。此階段旨在對抗「Happy Path」的盲區，確保改動完全符合使用者深層意圖與專案的邊界條件。一旦發現落差，必須立刻返工修正。
 
 ---
 
-## Phase 3: 維護與壓縮 (Maintain / On-demand)
+## Phase 3: 寫入與學習 (Learn / Post-task)
+
+當審核通過，任務真正結束且需要記錄經驗時，讀取 `<SKILL_DIR>/docs/learn.md` 並遵循其中的完整寫入 SOP。
+
+---
+
+## Phase 4: 維護與壓縮 (Maintain / On-demand)
 
 當人類下達「優化 agent-context」、「整理知識庫」或 `/maintain` 指令時，讀取 `<SKILL_DIR>/docs/maintain.md` 並遵循其中的維護 SOP。此階段會根據知識庫規模，執行合併重複 lesson、銳化標題、演進 index 結構、淘汰過時資訊等操作。
