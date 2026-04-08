@@ -20,6 +20,12 @@
 
 在 `.agent-lessons/lessons/` 下建立 Markdown 檔案，命名必須具體（如 `stripe_webhook_idempotency.md`）。
 
+**排版建議：** 如果情境適合，可以使用 Markdown Table 來整理資訊。但請特別注意，**使用 Table 時分隔線 `-` 只需要產一格即可**，例如：
+
+|-|-|-|
+
+這樣可以有效避免產生過多分隔符號導致 Token 浪費或生成過慢。
+
 ```markdown
 # [精準標題，如：Stripe Webhook 必須做冪等檢查]
 
