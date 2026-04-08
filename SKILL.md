@@ -1,57 +1,56 @@
 ---
 name: agent-lessons-router
-description: 專案的架構決策與歷史踩坑紀錄（Gotchas）。支援使用 `/alr` 或 `alr` 快速觸發。在執行任何架構修改、API 串接或 Debug 任務前，必須先透過此 Skill 檢索相關上下文。同時規範了如何將新經驗寫入本地知識庫。
+description: Architectural decisions and historical gotchas. Supports fast trigger via `/alr` or `alr`. Before executing any architectural changes, API integrations, or debugging tasks, you MUST retrieve the relevant context through this Skill. It also defines how to write new experiences into the local knowledge base.
 tags: [workflow, architecture, knowledge-base, memory, alr]
 ---
 
 # Agent-Lessons-Router (ALR)
 
-本專案採用「漸進式揭露 (Progressive Disclosure)」來管理 AI 上下文。你**絕對不能**憑空猜測系統架構或過去的決策，也**絕對不能**在未經驗證的情況下隨意新增經驗。
+This project adopts "Progressive Disclosure" to manage AI context. You **absolutely must NOT** guess the system architecture or past decisions out of thin air, and you **absolutely must NOT** casually add new experiences without validation.
 
-請嚴格遵守以下標準作業流程 (SOP)：
+Please strictly follow the Standard Operating Procedure (SOP) below:
 
 ---
 
-## Phase 0: 初始化 (Bootstrap)
+## Phase 0: Bootstrap
 
-確認當前工作目錄下是否存在 `.agent-lessons/` 資料夾。如果**不存在**，執行本 Skill 內附的安裝腳本進行初始化：
+Check if the `.agent-lessons/` directory exists in the current working directory. If it **does NOT exist**, execute the installation script included in this Skill to initialize it:
  
 ```bash
 bash <SKILL_DIR>/scripts/install.sh
 ```
 
-如果已存在則跳過，直接進入 Phase 1。
+If it already exists, skip this step and proceed directly to Phase 1.
 
 ---
 
-## Phase 1: 讀取與檢索 (Recall / Pre-task)
+## Phase 1: Recall & Retrieve (Pre-task)
 
-在開始編寫程式碼或進行 Debug 之前，你必須先尋找是否已有相關的歷史經驗：
+Before starting to write code or debug, you must first check if there are any related historical experiences:
 
-1. **讀取路由表：** 靜默讀取 `.agent-lessons/index.md`。
-2. **關鍵字比對：** 根據你當前的任務目標（例如：處理資料庫、修改金流、認證機制），在 `index.md` 中尋找對應的 Tags 或檔案路徑。
-3. **按需讀取 (Progressive Disclosure)：** 如果找到高度相關的實體檔案（例如 `lessons/db_sqlite.md`），請明確讀取該檔案的完整內容，並將其視為**最高優先級的架構約束**。
-4. **無紀錄則略過：** 如果 `index.md` 中沒有相關紀錄，代表這是一個新領域，你可以基於現有程式碼結構直接開始工作。**不要**去讀取無關的經驗檔以免污染你的 Context。 
-5. **依序 fallback 到：** 
-   - 最近的 agent-facing project
-   - guidance repo-local skills / tool config 
-   - source structure
-
-
----
-
-## Phase 2: 審查與自省 (Review / Post-execution)
-
-在實作進入收尾階段前，你必須讀取 `<SKILL_DIR>/docs/review.md`，並強制進入自我審核（或開啟 Subagent 審核）。此階段旨在對抗「Happy Path」的盲區，確保改動完全符合使用者深層意圖與專案的邊界條件。一旦發現落差，必須立刻返工修正。
+1. **Read the Router Table:** Silently read `.agent-lessons/index.md`.
+2. **Keyword Matching:** Based on your current task objectives (e.g., database handling, payment modification, authentication mechanisms), search for corresponding Tags or file paths in `index.md`.
+3. **On-Demand Reading (Progressive Disclosure):** If you find highly relevant physical files (e.g., `lessons/db_sqlite.md`), explicitly read the full content of those files and treat them as the **highest priority architectural constraints**.
+4. **Skip if No Records:** If there are no related records in `index.md`, it means this is an unexplored territory. You can start working directly based on the existing codebase structure. **Do NOT** read irrelevant experience files to avoid polluting your Context.
+5. **Fallback Sequentially To:** 
+   - The most recent agent-facing project
+   - Guidance repo-local skills / tool config
+   - Source structure
 
 ---
 
-## Phase 3: 寫入與學習 (Learn / Post-task)
+## Phase 2: Review & Retrospection (Post-execution)
 
-當審核通過，任務真正結束且需要記錄經驗時，讀取 `<SKILL_DIR>/docs/learn.md` 並遵循其中的完整寫入 SOP。
+Before the implementation enters its final phase, you must read `<SKILL_DIR>/docs/review.md` and forcibly engage in self-review (or initiate a Subagent for review). This phase aims to combat "Happy Path" blind spots and ensure the modifications fully align with the user's deep intentions and the project's edge conditions. If any discrepancies are found, you must immediately rework and fix them.
 
 ---
 
-## Phase 4: 維護與壓縮 (Maintain / On-demand)
+## Phase 3: Learn & Write (Post-task)
 
-當人類下達「優化 agent-context」、「整理知識庫」或 `/maintain` 指令時，讀取 `<SKILL_DIR>/docs/maintain.md` 並遵循其中的維護 SOP。此階段會根據知識庫規模，執行合併重複 lesson、銳化標題、演進 index 結構、淘汰過時資訊等操作。
+When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP.
+
+---
+
+## Phase 4: Maintain & Compress (On-demand)
+
+When the human user issues commands like "optimize agent-context," "organize knowledge base," or `/maintain`, read `<SKILL_DIR>/docs/maintain.md` and follow its maintenance SOP. Depending on the size of the knowledge base, this phase involves operations such as merging duplicate lessons, sharpening titles, evolving the index structure, and deprecating outdated information.

@@ -1,64 +1,64 @@
-# Phase 2: 寫入與學習 (Learn / Post-task)
+# Phase 3: Learn & Write (Post-task)
 
-我們拒絕錯誤累積，也拒絕廢話累積。每一條 Lesson 必須是**可直接執行的高精度結論**，而非冗長的故事或背景描述。
+We refuse the accumulation of errors, and we refuse the accumulation of nonsense. Every Lesson must be a **highly precise conclusion that can be directly executed**, rather than a lengthy story or background description.
 
-## 寫入的先決條件 (Gatekeeper)
+## Writing Prerequisite (Gatekeeper)
 
-滿足**任一條件**才能寫入：
-- 程式碼已通過測試 (CI/Tests Passed)。
-- 人類明確指示：「記錄下來」、「記住這個坑」或 `/learn`。
+A lesson can only be written if **any one** of the following conditions is met:
+- The code has passed tests (CI/Tests Passed).
+- A human explicitly instructed: "Record this down", "Remember this gotcha", or used the `/learn` command.
 
-## 寫入原則：最簡學習法
+## Writing Principle: Minimalist Learning Method
 
-每條 Lesson 的核心是一句能被未來 Agent **直接當作指令遵守**的結論。問自己：
+The core of every Lesson is a single-sentence conclusion that future Agents can **directly follow as an instruction**. Ask yourself:
 
-> 「如果未來的 Agent 只讀這一句話，他能避開這個坑嗎？」
+> "If a future Agent only reads this one sentence, can it avoid this pitfall?"
 
-如果不能，就重寫到能為止。
+If not, rewrite it until it can.
 
-### 格式規範
+### Formatting Guidelines
 
-在 `.agent-lessons/lessons/` 下建立 Markdown 檔案，命名必須具體（如 `stripe_webhook_idempotency.md`）。
+Create a Markdown file under `.agent-lessons/lessons/`, and the naming must be specific (e.g., `stripe_webhook_idempotency.md`).
 
-**排版建議：** 如果情境適合，可以使用 Markdown Table 來整理資訊。但請特別注意，**使用 Table 時分隔線 `-` 只需要產一格即可**，例如：
+**Formatting Advice:** If appropriate, you can use Markdown Tables to organize information. However, please pay special attention: **when using a Table, only one `-` is needed per column separator**, for example:
 
 |-|-|-|
 
-這樣可以有效避免產生過多分隔符號導致 Token 浪費或生成過慢。
+This effectively avoids generating too many separator characters, which can lead to token waste or slow generation.
 
 ```markdown
-# [精準標題，如：Stripe Webhook 必須做冪等檢查]
+# [Precise Title, e.g., Stripe Webhook MUST do idempotency check]
 
 ## Rule
-<!-- 一句話結論。這是整個檔案最重要的部分。 -->
-<!-- 範例：「Stripe webhook handler 必須用 event.id 做冪等檢查，否則重試會導致重複扣款。」 -->
+<!-- A one-sentence conclusion. This is the most important part of the entire file. -->
+<!-- Example: "The Stripe webhook handler must use event.id for idempotency checks, otherwise retries will lead to duplicate charges." -->
 
 ## Don't
-<!-- 錯誤做法，一句話。省略顯而易見的內容。 -->
-<!-- 範例：「不要信任 webhook 的到達順序。」 -->
+<!-- The wrong approach, in one sentence. Omit obvious content. -->
+<!-- Example: "Do not trust the arrival order of webhooks." -->
 
-## Why（選填）
-<!-- 只在原因不明顯時才寫，限 1-2 句。 -->
+## Why (Optional)
+<!-- Only write if the reason is not obvious. Limit to 1-2 sentences. -->
 
-## Refs（選填）
-<!-- 相關檔案路徑或連結，純列表，不加說明文字。 -->
+## Refs (Optional)
+<!-- Related file paths or links, as a pure list without explanatory text. -->
 
 ## Updated
 <!-- YYYY-MM-DD -->
 ```
 
-**反模式 — 以下內容禁止出現在 Lesson 中：**
-- ❌ 冗長的 Context / 背景故事（「我們當時在做 X 專案，因為 Y 需求…」）
-- ❌ 探索過程的流水帳（「先試了 A，不行，又試了 B…」）
-- ❌ 顯而易見的結論（「測試很重要」、「要看文件」）
+**Anti-patterns — The following content is forbidden in a Lesson:**
+- ❌ Lengthy Context / Background stories ("We were doing project X back then, and because of requirement Y...")
+- ❌ A chronological log of the exploration process ("First tried A, didn't work, then tried B...")
+- ❌ Obvious conclusions ("Testing is important", "Read the documentation")
 
-## 更新路由表
+## Update the Router Table
 
-寫入 Lesson 後，必須同步更新 `.agent-lessons/index.md`，格式：
+After writing a Lesson, you must synchronously update `.agent-lessons/index.md` in this format:
 
-| 檔案路徑 | 一句話結論 | Tags |
+| File Path | One-Sentence Conclusion | Tags |
 |-|-|-|
 
-## 清理過期資訊
+## Clean up Obsolete Information
 
-如果新驗證的結果與舊 Lesson 衝突，**直接覆寫或刪除**舊的過時規則。知識庫只保留當前正確的結論。
+If a newly verified result conflicts with an old Lesson, **directly overwrite or delete** the obsolete rule. The knowledge base only retains current, correct conclusions.
