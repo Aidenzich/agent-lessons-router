@@ -1,31 +1,32 @@
-# Phase 2: 審查與自省 (Review / Post-execution)
+# Phase 2: Review / Post-execution
 
-為了解決 LLM Agent 經常過度傾向「Happy Path（理想情況）」而忽略邊界條件，甚至曲解使用者深層意圖的毛病，所有進入收尾階段的改動，必須先經過本審查流程。
-
----
-
-## 核心目標 (Core Objectives)
-
-1. **對照真實意圖**：比對「使用者最初的要求與 Context」與「目前實際產出的程式碼/設計」，找出潛在的落差。
-2. **防範 Happy Path 陷阱**：主動評估目前的實作是否只有在理想狀態下才能運作？錯誤處理、邊界條件、或系統相依性是否完備？
-3. **強制重動工 (Resume Work)**：若發現任何落差，立刻拒絕結案，強制自己（或通知負責的進程）依據落差重新修改。
+To address the common tendency of LLM Agents to overly favor the "Happy Path" while ignoring edge cases or even misinterpreting the user's deep intentions, all modifications entering the finalize stage must first go through this review process.
 
 ---
 
-## 執行 SOP (Standard Operating Procedure)
+## Core Objectives
 
-1. **開啟第三方視角 (Subagent 待機與執行)**：
-   若系統具備開啟 Subagent 之能力，**你的第一個動作必須是：先開啟一個 Subagent 並讓其待機**。等到把實作內容與 Context 全部整理好後，再請該 Subagent 正式開始 Review。這項規定可強制阻斷主 Agent 「忘記開 Subagent 乾脆自己草率檢查」的偷懶行為。只有在系統絕對無法開啟 Subagent 的情況下，主 Agent 才能自行切換至嚴苛的「Reviewer 角色」代為執行。
+1. **Align with True Intentions**: Compare "the user's initial requirements and context" with "the current actual output (code/design)" to identify any potential gaps.
+2. **Prevent the Happy Path Trap**: Proactively evaluate whether the current implementation only works under ideal conditions. Are error handling, edge cases, and system dependencies comprehensive?
+3. **Resume Work on Findings**: If any discrepancies are found, strictly reject closure and force yourself (or notify the responsible process) to resume work and modify based on the gaps.
+4. **Strictly Review and Report**: The task is to focus exclusively on reviewing and identifying errors. Do not proactively attempt to "fix the errors". The core emphasis is solely on reporting.
+
+---
+
+## Standard Operating Procedure (SOP)
+
+1. **Enable Third-party Perspective (Subagent Standby and Execution)**:
+   If the system has the capability to initiate a Subagent, **your very first action must be: start a Subagent and put it on standby**. Wait until all implementation details and context are fully organized before asking the Subagent to officially begin the review. This rule forcibly prevents the main Agent from lazily skipping the Subagent and doing a hasty self-check. The main Agent can only switch to a strict "Reviewer role" to perform the check itself if it is absolutely impossible to initiate a Subagent.
    
-2. **審查四大提問 (The Review Checklist)**：
-   - **意圖對齊**：這份實作「真正」解決了使用者的核心訴求嗎？還是只做表面功夫？
-   - **邊界驗證**：如果輸入非預期資料、API 逾時、或沒有權限時，這段程式碼會安全退場嗎？會不會產生幽靈臭蟲 (Silent bug)？
-   - **全局視角 (Local Minimum 檢測)**：**審核自己是不是卡在 Local Minimum 了？** 若發現為了解除一個小錯誤而疊加了無數層補丁，導致邏輯變得異常複雜肥大，必須果斷跳脫當前思維，尋找更乾淨、底層的根本解法。
-   - **知識庫相容**：這項改動是否違反了 `.agent-lessons` 裡記載的歷史教訓或架構約定？是真正的解法還是一個 Dirty Hack？
+2. **The Review Checklist (Four Key Questions)**:
+   - **Intent Alignment**: Does this implementation "truly" solve the user's core requests, or does it merely scratch the surface?
+   - **Edge Case Validation**: If unexpected data is inputted, an API times out, or permissions are lacking, will this code gracefully exit? Will it cause any silent bugs?
+   - **Global Perspective (Local Minimum Detection)**: **Review whether you are stuck in a Local Minimum.** If you realize that countless patches have been layered just to fix a minor error, making the logic unusually complex and bloated, you must decisively break away from the current mindset and look for a cleaner, more fundamental underlying solution.
+   - **Knowledge Base Compatibility**: Does this change violate any historical lessons or architectural conventions documented in `.agent-lessons`? Is it a genuine solution or just a dirty hack?
 
-3. **強制審查閘門與返工 (Strict Execution Gate & Rework)**：
-   Review 流程有極度嚴格的鐵律（Gate），以杜絕應付了事或敷衍結案：
-   - **不接受空泛建議**：審查報告中嚴禁出現「未來可以考慮優化」、「寫得很棒」等沒有意義的廢話。
-   - **二元判定 (Findings or PASS)**：審核結果**只接受**具體的 `Findings`（明確的邏輯漏洞或落差）或者是乾脆宣告 `PASS`。
-   - **強制回修**：一旦出現任何 `Findings`，Agent **絕不准草率結案**。必須立刻將其列為 TODO 重新動工修正。若缺陷涉及模糊地帶，必須整理極端情境向人類釐清，絕不可自行腦補 Happy Path。
-   - **無限迴圈直到通過 (Iterative Review)**：**修完要再 review 一輪！** 返工結束並非任務結束，必須強制重新啟動 Phase 2 審查流程，直到該次審核完全沒有 Findings、100% 獲得 `PASS` 為止，才能往下一關 (Phase 3) 走。
+3. **Strict Execution Gate & Rework**:
+   The review process has extremely strict rules (Gates) to prevent superficial work or perfunctory task closure:
+   - **No Vague Suggestions**: The review report strictly forbids meaningless fluff like "can be optimized in the future" or "great job".
+   - **Binary Verdict (Findings or PASS)**: The review result **only accepts** specific `Findings` (clear logic flaws or gaps) or an absolute declaration of `PASS`.
+   - **Mandatory Rework**: The moment any `Findings` appear, the Agent **is absolutely forbidden from simply closing the task**. The issues must immediately be listed as TODOs for rework and fixing. If a defect involves a gray area, extreme scenarios must be organized and clarified with the user; do not mentally invent a Happy Path.
+   - **Iterative Review (Loop Until Pass)**: **After fixing, you must review again!** The end of rework does not mean the end of the task. You must forcibly restart the Phase 2 review process until the audit yields zero Findings and achieves a 100% `PASS`. Only then can you proceed to the next stage (Phase 3).
