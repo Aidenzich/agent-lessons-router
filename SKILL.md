@@ -28,10 +28,11 @@ If it already exists, skip this step and proceed directly to Phase 1.
 
 Before starting to write code or debug, you must first check if there are any related historical experiences:
 
-1. **Read the Router Table:** Silently read `.agent-lessons/index.md`.
-2. **Keyword Matching:** Based on your current task objectives (e.g., database handling, payment modification, authentication mechanisms), search for corresponding Tags or file paths in `index.md`.
-3. **On-Demand Reading (Progressive Disclosure):** If you find highly relevant physical files (e.g., `lessons/db_sqlite.md`), explicitly read the full content of those files and treat them as the **highest priority architectural constraints**.
-4. **Skip if No Records:** If there are no related records in `index.md`, it means this is an unexplored territory. You can start working directly based on the existing codebase structure. **Do NOT** read irrelevant experience files to avoid polluting your Context.
+1. **Read the Router Table:** Start by reading `.agent-lessons/index.md` to get the big picture.
+2. **Domain-Specific Indexes:** Pay attention to any `index_*.md` files (e.g., `index_g1.md`, `index_workspace.md`). These sub-indexes contain highly dense, domain-specific experiences.
+3. **Keyword & Topic Matching:** Based on your current task (e.g., Trello/Gitea integration, G1 parity), identify and read the `index_*.md` file that is **closest to your objective**.
+4. **On-Demand Reading (Progressive Disclosure):** From the chosen index, explicitly read the full content of relevant lesson files. Treat them as the highest priority architectural constraints.
+5. **Skip if No Records:** If no relevant records exist across all indexes, it is unexplored territory. Do not read irrelevant files.
 5. **Fallback Sequentially To:** 
    - The most recent agent-facing project
    - Guidance repo-local skills / tool config
