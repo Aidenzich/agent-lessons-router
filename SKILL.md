@@ -12,6 +12,17 @@ Please strictly follow the Standard Operating Procedure (SOP) below:
 
 ---
 
+## Terminology & Boundaries
+
+為了避免混淆，Agent 必須區分以下兩個物理路徑：
+
+- **PROJECT_ROOT (當前工作目錄)**：專案代碼所在的目錄。所有 **專案專屬 (Project-specific)** 的知識、Lesson、自動化腳本（`.agent-lessons/scripts/`）都必須存放在此目錄下的 `.agent-lessons/` 資料夾內。
+- **SKILL_DIR (Skill 安裝目錄)**：本 Skill 邏輯所在的目錄。僅用於存放 **工具核心 (Tool-core)** 的 SOP 指引（`docs/`）、通用安裝腳本（`scripts/`）或跨專案的基礎設施邏輯。**嚴禁**將單一專案的 Lesson 或業務腳本存入此目錄。
+
+原則：**知識隨專案走 (Local)，工具隨 Skill 走 (Global)。**
+
+---
+
 ## Phase 0: Bootstrap
 
 Check if the `.agent-lessons/` directory exists in the current working directory. If it **does NOT exist**, execute the installation script included in this Skill to initialize it:
@@ -48,7 +59,7 @@ Before the implementation enters its final phase, you must read `<SKILL_DIR>/doc
 
 ## Phase 3: Learn & Write (Post-task)
 
-When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP.
+When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP. **所有新 Lesson 與專案腳本必須寫入 `PROJECT_ROOT/.agent-lessons/`。**
 
 ---
 
