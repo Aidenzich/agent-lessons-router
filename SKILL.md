@@ -14,12 +14,12 @@ Please strictly follow the Standard Operating Procedure (SOP) below:
 
 ## Terminology & Boundaries
 
-為了避免混淆，Agent 必須區分以下兩個物理路徑：
+To avoid confusion, the Agent must distinguish between the following two physical paths:
 
-- **PROJECT_ROOT (當前工作目錄)**：專案代碼所在的目錄。所有 **專案專屬 (Project-specific)** 的知識、Lesson、自動化腳本（`.agent-lessons/scripts/`）都必須存放在此目錄下的 `.agent-lessons/` 資料夾內。
-- **SKILL_DIR (Skill 安裝目錄)**：本 Skill 邏輯所在的目錄。僅用於存放 **工具核心 (Tool-core)** 的 SOP 指引（`docs/`）、通用安裝腳本（`scripts/`）或跨專案的基礎設施邏輯。**嚴禁**將單一專案的 Lesson 或業務腳本存入此目錄。
+- **PROJECT_ROOT (Current Working Directory)**: The directory where the project code resides. All **project-specific** knowledge, lessons, and automation scripts (e.g., `.agent-lessons/scripts/`) must be stored within the `.agent-lessons/` folder in this directory.
+- **SKILL_DIR (Skill Installation Directory)**: The directory where this Skill's logic resides. It is used only for storing **tool-core** SOP guidelines (`docs/`), universal installation scripts (`scripts/`), or cross-project infrastructure logic. It is **strictly forbidden** to save project-specific lessons or scripts into this directory.
 
-原則：**知識隨專案走 (Local)，工具隨 Skill 走 (Global)。**
+Principle: **Knowledge stays with the Project (Local), tools stay with the Skill (Global).**
 
 ---
 
@@ -59,10 +59,18 @@ Before the implementation enters its final phase, you must read `<SKILL_DIR>/doc
 
 ## Phase 3: Learn & Write (Post-task)
 
-When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP. **所有新 Lesson 與專案腳本必須寫入 `PROJECT_ROOT/.agent-lessons/`。**
+When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP. **All new lessons and project-specific scripts must be written to `PROJECT_ROOT/.agent-lessons/`.**
 
 ---
 
 ## Phase 4: Maintain & Compress (On-demand)
 
 When the human user issues commands like "optimize agent-context," "organize knowledge base," or `/maintain`, read `<SKILL_DIR>/docs/maintain.md` and follow its maintenance SOP. Depending on the size of the knowledge base, this phase involves operations such as merging duplicate lessons, sharpening titles, evolving the index structure, and deprecating outdated information.
+
+---
+
+## Skill Directory Structure
+
+- **scripts/** - Contains ALR infrastructure scripts (e.g., `install.sh`).
+- **docs/** - Contains detailed SOP guidelines for each phase (`review.md`, `learn.md`, `maintain.md`).
+- **lesson_scripts/** - (Reserved/Internal) Universal helper patterns for the router logic itself.
