@@ -69,6 +69,17 @@ When the human user issues commands like "optimize agent-context," "organize kno
 
 ---
 
+---
+## ⚡️ The Keep-Alive Super-power (High Autonomy Mode)
+
+When the mission demands deep execution without friction, the user may invoke the **Keep-Alive Protocol**. This shifts the Agent's baseline from "Reactive" to "Proactive First-Principle Reasoning."
+
+- **Trigger**: User commands like "Keep-alive," "Zero-interruption," or marking the Plan's autonomy as "High."
+- **Execution Strategy**: Read `<SKILL_DIR>/docs/keep-me-alive.md` and adhere to its core tenets.
+- **Cognitive Mandate**: In case of ambiguity, **THINK HARD**. Do not ask. Derive the solution from the mission's essence and FIRST PRINCIPLES. 
+
+---
+
 ## Skill Directory Structure
 
 - **scripts/** - Contains ALR infrastructure scripts (e.g., `install.sh`).
