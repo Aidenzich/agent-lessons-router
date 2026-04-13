@@ -8,13 +8,13 @@ A lesson can only be written if **any one** of the following conditions is met:
 - The code has passed tests (CI/Tests Passed).
 - A human explicitly instructed: "Record this down", "Remember this gotcha", or used the `/learn` command.
 
-## Writing Principle: Minimalist Learning Method
+### Mandatory Correction Obligation
 
-The core of every Lesson is a single-sentence conclusion that future Agents can **directly follow as an instruction**. Ask yourself:
+If an Agent follows a Lesson but encounters errors or discovers that the information is stale/incorrect during execution, **that Agent has an absolute obligation to immediately correct or update said Lesson**. We must maintain a "self-healing" knowledge base.
 
-> "If a future Agent only reads this one sentence, can it avoid this pitfall?"
+### Consolidation Principle (Anti-Sprawl)
 
-If not, rewrite it until it can.
+Before creating a new Lesson, you must first check if a similar or related Lesson already exists. **Prioritize updating and expanding existing Lessons** rather than creating new, fragmented files for highly homogeneous content. Aim for fewer, higher-quality, and more comprehensive Lesson "pillars".
 
 ### Formatting Guidelines
 
