@@ -12,6 +12,12 @@ Please strictly follow the Standard Operating Procedure (SOP) below:
 
 ---
 
+## Core Philosophy
+
+**When in doubt or facing an unknown project state, your first and most critical action is to consult the existing lessons (`.agent-lessons/`).** Do not rely on assumptions or general knowledge; always prioritize the project's historical records and architectural decisions preserved in the lessons.
+
+---
+
 ## Terminology & Boundaries
 
 To avoid confusion, the Agent must distinguish between the following two physical paths:
@@ -73,10 +79,8 @@ When the human user issues commands like "optimize agent-context," "organize kno
 ## ⚡️ The Keep-Alive Super-power (High Autonomy Mode)
 
 When the mission demands deep execution without friction, the user may invoke the **Keep-Alive Protocol**. This shifts the Agent's baseline from "Reactive" to "Proactive First-Principle Reasoning."
-
 - **Trigger**: User commands like "Keep-alive," "Zero-interruption," or marking the Plan's autonomy as "High."
-- **Execution Strategy**: Read `<SKILL_DIR>/docs/keep-me-alive.md` and adhere to its core tenets.
-- **Cognitive Mandate**: In case of ambiguity, **THINK HARD**. Do not ask. Derive the solution from the mission's essence and FIRST PRINCIPLES. 
+- **Execution Strategy**: MUST Read `<SKILL_DIR>/docs/keep-me-alive.md` and adhere to its core tenets when triggered.
 
 ---
 

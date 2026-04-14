@@ -34,4 +34,13 @@ While the Agent does not *ask* during this mode, it must *signal*:
 - Update the `task.md` frequently to provide a telemetry stream of progress.
 - Document any autonomous pivots in the final `walkthrough.md` with reasoning.
 
+---
+
+## 🔄 Infinite Loop Recovery (Progressive Disclosure)
+
+If at any point during High-Autonomy execution you find yourself repeating tool calls or yielding zero new mission-critical knowledge for **8 consecutive actions**, it is highly probable you have reached a knowledge blind spot. You **MUST** immediately read:
+- `<SKILL_DIR>/docs/deep-reflection-protocol.md`
+
+This document contains the terminal protocol to reset your reasoning chain and execute a first-principle breakthrough.
+
 > "True power is not just doing what you're told, but knowing what needs to be done to achieve the dream."
