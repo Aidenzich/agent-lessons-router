@@ -1,6 +1,6 @@
 # Phase 4: Maintain & Compress (On-demand)
 
-When receiving a human command such as "optimize agent-context", "organize knowledge base", or `/maintain`, please execute global or local compression and organization on the `.agent-lessons/` directory according to the SOP below. Core principle: Distill rules, reduce noise.
+When receiving a human command such as "optimize agent-context", "organize knowledge base", or `/maintain`, please execute global or local compression and organization on the `PROJECT_ROOT/.agent-lessons/` directory according to the SOP below. Core principle: Distill rules, reduce noise.
 
 ---
 

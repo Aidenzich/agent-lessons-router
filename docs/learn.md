@@ -7,6 +7,7 @@ We refuse the accumulation of errors, and we refuse the accumulation of nonsense
 A lesson can only be written if **any one** of the following conditions is met:
 - The code has passed tests (CI/Tests Passed).
 - A human explicitly instructed: "Record this down", "Remember this gotcha", or used the `/learn` command.
+- **Complexity/Difficulty Encountered**: The task took more than one try, involved non-obvious infrastructure knowledge, or required a significant architectural pivot.
 
 ### Mandatory Correction Obligation
 
@@ -15,10 +16,20 @@ If an Agent follows a Lesson but encounters errors or discovers that the informa
 ### Consolidation Principle (Anti-Sprawl)
 
 Before creating a new Lesson, you must first check if a similar or related Lesson already exists. **Prioritize updating and expanding existing Lessons** rather than creating new, fragmented files for highly homogeneous content. Aim for fewer, higher-quality, and more comprehensive Lesson "pillars".
+### The Complexity Threshold (Mandatory Learning)
+
+You are **obligated** to create or update a lesson if any of the following occurred:
+1. **Multiple Attempts**: You had to refine your approach because the first attempt failed or was suboptimal.
+2. **Hidden Gotchas**: You discovered a constraint that wasn't documented in the source but required investigation (e.g., hidden environment variables, specific version quirks).
+3. **Infrastructure Magic**: You had to use specific terminal commands or scripts that are not part of the standard `npm/make` workflow.
+4. **Architectural Pivots**: You chose one design pattern over another for a specific reason that might affect future stability.
+
+**Rule of thumb:** If the next agent would likely spend more than 2 minutes "figuring it out" without your notes, it belongs in a Lesson.
+
 
 ### Formatting Guidelines
 
-Create a Markdown file under `.agent-lessons/lessons/`, and the naming must be specific (e.g., `stripe_webhook_idempotency.md`).
+Create a Markdown file under `PROJECT_ROOT/.agent-lessons/lessons/`, and the naming must be specific (e.g., `stripe_webhook_idempotency.md`).
 
 **Formatting Advice:** If appropriate, you can use Markdown Tables to organize information. However, please pay special attention: **when using a Table, only one `-` is needed per column separator**, for example:
 
@@ -54,7 +65,7 @@ This effectively avoids generating too many separator characters, which can lead
 
 ## Update the Router Table
 
-After writing a Lesson, you must synchronously update `.agent-lessons/index.md` in this format:
+After writing a Lesson, you must synchronously update `PROJECT_ROOT/.agent-lessons/index.md` in this format:
 
 | File Path | One-Sentence Conclusion | Tags |
 |-|-|-|

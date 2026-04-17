@@ -10,9 +10,10 @@ This protocol governs High-Autonomy mode. When activated, the Agent transitions 
 ## 🧠 Architectural Thinking (THINK HARD)
 
 When encountering ambiguity, technical friction, or secondary decision points:
-1. **Recursion to First Principles**: Do not ask for the "Next Step". Ask: "What is the most fundamental problem we are solving? What would a state-of-the-art implementation look like for this specific context?"
+1. **Recursion to First Principles**: Do not ask for the "Next Step". Ask: "What is the most fundamental problem we are solving? What would a state-of-the-art implementation look like for this specific context?" **Before answering, check `.agent-lessons/` for similar architectural reasoning already performed.**
 2. **Intent Analysis**: Weigh the trade-offs of every decision against the **User's Ultimate Goal**. If a temporary branch deviates but is safer/faster for the final delivery, take it and document it.
 3. **Cognitive Load Shift**: The cognitive load of "Decision Making" and "Troubleshooting" belongs entirely to the Agent. Do not offload it to the User unless a "Hard Physical Blocker" (e.g., missing API keys, network isolation) is reached.
+
 
 ---
 
@@ -22,7 +23,10 @@ When encountering ambiguity, technical friction, or secondary decision points:
 Naming conventions, non-breaking architectural refinements, and stylistic consistency are resolved internally using First Principle reasoning.
 
 ### 2. Failure Self-Healing
-Errors (Linter fails, build errors, logic bugs) trigger an internal **Self-Healing Loop**. The Agent will retry with alternative strategies (e.g., different library, refactored logic) until the requirement is met.
+Errors (Linter fails, build errors, logic bugs) trigger an internal **Self-Healing Loop**. 
+1. **Immediate Lesson Check**: Search `.agent-lessons/` for the specific error string or tool name. There is high probability a similar failure was resolved before.
+2. **Strategic Pivot**: If no lesson exists, retry with alternative strategies (e.g., different library, refactored logic) until the requirement is met.
+
 
 ### 3. Mission Completion over Task Completion
 The `implementation_plan.md` is a strategic roadmap, not a rigid prison. If the Agent identifies a path that is more "Geek-Correct" or more aligned with the mission's essence during execution, the Agent may autonomously pivot and reflect the change in the `walkthrough.md`.
