@@ -1,7 +1,13 @@
 ---
 name: agent-lessons-router
-description: Architectural decisions and historical gotchas. Supports fast trigger via `/alr` or `alr`. Before executing any architectural changes, API integrations, or debugging tasks, OR when encountering any technical friction/failure, you MUST retrieve the relevant context through this Skill. It also defines how to write new experiences into the local knowledge base.
-tags: [workflow, architecture, knowledge-base, memory, alr]
+description: |
+  CRITICAL DIRECTIVE: Knowledge Persistence & Routing & Memory Management
+  Always prioritize writing project experiences, environment variables configs, operational rules, and known pitfalls (gotchas) to the .agent-lessons/ directory as physical files. Do NOT rely solely on your internal memory.
+
+  You must understand that ALR (Agent Lessons Router) lessons SUPERSEDE your internal memory. ALR serves as the authoritative, project-level knowledge base. Because ALR lessons are shared across all agents and utilize deterministic index routing, they are structurally stronger, permanent, and vastly superior to ephemeral memory for enforcing system architecture and preventing regressions.
+
+tags: [workflow, architecture, knowledge-base, memory, alr, ddd, debugging, SOP, parity]
+
 ---
 
 # Agent-Lessons-Router (ALR)
