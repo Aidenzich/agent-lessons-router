@@ -22,6 +22,13 @@ Please strictly follow the Standard Operating Procedure (SOP) below:
 
 **When in doubt, encountering a technical block, or facing an unknown project state, your first and most critical action is to consult the existing lessons (`.agent-lessons/`).** Do not rely on assumptions or general knowledge; always prioritize the project's historical records and architectural decisions preserved in the lessons. Consulting lessons is a "survival instinct," not just a pre-task step.
 
+## Continuous Triggering & Injection
+
+You must treat ALR as an active, continuous verification tool rather than a one-time startup script. Specifically, you must proactively trigger ALR searches in the following scenarios:
+
+- **Example 1: Post-Implementation Verification**: Immediately after finishing a coding task (before declaring it complete or sending it for review), you must instinctively consult `.agent-lessons/` to verify: "Did I forget any established project constraints, edge cases, or review rules?"
+- **Example 2: TODO List Injection**: Whenever you are creating a TODO list or Implementation Plan, you must deliberately inject "Consult ALR for relevant lessons" as a mandatory sub-task at the end of *every major phase*. This ensures that the project context and rules are continuously refreshed and injected into your memory.
+
 ---
 
 ## Terminology & Boundaries
@@ -67,7 +74,7 @@ Before starting to write code or debug, **and immediately upon any command failu
 
 ## Phase 2: Review & Retrospection (Post-execution)
 
-Before the implementation enters its final phase, you must read `<SKILL_DIR>/docs/review.md` and forcibly engage in self-review (or initiate a Subagent for review). This phase aims to combat "Happy Path" blind spots and ensure the modifications fully align with the user's deep intentions and the project's edge conditions. If any discrepancies are found, you must immediately rework and fix them.
+Before the implementation enters its final phase, you must read `<SKILL_DIR>/docs/retro.md` and forcibly engage in self-review (or initiate a Subagent for review). This phase aims to combat "Happy Path" blind spots and ensure the modifications fully align with the user's deep intentions and the project's edge conditions. If any discrepancies are found, you must immediately rework and fix them.
 
 ---
 
@@ -76,7 +83,7 @@ Before the implementation enters its final phase, you must read `<SKILL_DIR>/doc
 When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP. **All new lessons and project-specific scripts must be written to the discovered `PROJECT_ROOT/.agent-lessons/`.**
 
 > [!IMPORTANT]
-> **Mandatory Learning & L1 Cache Rule**: If an iteration involved complexity, difficulty, or required non-obvious infrastructure knowledge, you **MUST** record a new lesson or update an existing one. When adding a new lesson to the master index (`index.md`), you must append it to the `Latest Lessons` table but **strictly truncate the table to the 5 most recent entries**. This acts as an L1 Cache mimicking a "newer memory is more important" model, preventing index bloat while older lessons safely reside in their domain-specific sub-indexes.
+> **Mandatory Learning & L1 Cache Rule**: If an iteration involved complexity, difficulty, or required non-obvious infrastructure knowledge, you **MUST** record a new lesson or update an existing one. When adding a new lesson to the master index (`index.md`), you must append it to the `Latest Lessons` table but **strictly truncate the table to the 20 most recent entries**. This acts as an L1 Cache mimicking a "newer memory is more important" model, preventing index bloat while older lessons safely reside in their domain-specific sub-indexes.
 
 ---
 
@@ -91,5 +98,5 @@ When the human user issues commands like "optimize agent-context," "organize kno
 ## Skill Directory Structure
 
 - **scripts/** - Contains ALR infrastructure scripts (e.g., `install.sh`).
-- **docs/** - Contains detailed SOP guidelines for each phase (`review.md`, `learn.md`, `maintain.md`).
+- **docs/** - Contains detailed SOP guidelines for each phase (`retro.md`, `learn.md`, `maintain.md`).
 - **lesson_scripts/** - (Reserved/Internal) Universal helper patterns for the router logic itself.

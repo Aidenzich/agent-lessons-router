@@ -23,7 +23,7 @@ To address the common tendency of LLM Agents to overly favor the "Happy Path" wh
    - **Edge Case Validation**: If unexpected data is inputted, an API times out, or permissions are lacking, will this code gracefully exit? Will it cause any silent bugs?
    - **Global Perspective (Local Minimum Detection)**: **Review whether you are stuck in a Local Minimum.** If you realize that countless patches have been layered just to fix a minor error, making the logic unusually complex and bloated, you must decisively break away from the current mindset and look for a cleaner, more fundamental underlying solution.
    - **Knowledge Base Compatibility**: Does this change violate any historical lessons or architectural conventions documented in `.agent-lessons`? Is it a genuine solution or just a dirty hack?
-    - **Lesson Worthiness (Mandatory Learning)**: Did this iteration involve complexity, multiple attempts, or non-obvious knowledge? If so, **has a lesson been extracted or updated?** Failure to record complex learnings is a review failure.
+   - **Lesson Worthiness (Mandatory Learning)**: Did this iteration involve complexity, multiple attempts, or non-obvious knowledge? If so, **has a lesson been extracted or updated?** Failure to record complex learnings is a review failure.
 
 3. **Strict Execution Gate & Rework**:
    The review process has extremely strict rules (Gates) to prevent superficial work or perfunctory task closure:
