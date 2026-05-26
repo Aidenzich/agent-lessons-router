@@ -54,6 +54,41 @@ Principle: **Knowledge stay at the highest relevant level (Lessons Root), tools 
  bash <SKILL_DIR>/scripts/install.sh
  ```
 
+### Search Safety Rules
+
+ALR lookup must be cheap, bounded, and deterministic. Do **not** launch broad recursive `find` commands from a monorepo/workspace root just to locate `.agent-lessons`; those scans can traverse copied workspaces, `node_modules`, `.git`, generated `dist`, and other huge dependency trees.
+
+Use a parent-only find-up loop for bootstrap:
+
+```bash
+dir="$PWD"
+while [ "$dir" != "/" ]; do
+  if [ -d "$dir/.agent-lessons" ]; then
+    printf '%s\n' "$dir"
+    break
+  fi
+  dir="$(dirname "$dir")"
+done
+```
+
+If a content search is truly required after `PROJECT_ROOT` is known, search only inside `PROJECT_ROOT/.agent-lessons` with `rg` first. If `find` is unavoidable, prune heavy directories explicitly:
+
+```bash
+find "$PROJECT_ROOT/.agent-lessons" \
+  \( -name .git -o -name node_modules -o -name dist -o -name .agents-workspace -o -name .repos \) -prune -o \
+  -type f -name '*.md' -print
+```
+
+Forbidden patterns:
+
+```bash
+find /path/to/workspace -path '*/.agent-lessons/*' -print
+find .. -name .agent-lessons -type d -prune
+find "$PROJECT_ROOT" -name index.md -path '*/.agent-lessons/index.md' -print
+```
+
+When an existing automation uses broad ALR discovery, fix the automation before running another batch. Do not leave orphaned `find` processes scanning agent workspaces or dependency folders.
+
 ---
 
 ## Phase 1: Recall & Retrieve (Pre-task & Troubleshooting)
