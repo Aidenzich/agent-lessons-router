@@ -70,6 +70,13 @@ After writing a Lesson, you must synchronously update `PROJECT_ROOT/.agent-lesso
 | File Path | One-Sentence Conclusion | Tags |
 |-|-|-|
 
+**`Latest Lessons` is a recency cache (~20 rows) that gets truncated — so add a lesson there only if it ALSO has a durable home that survives truncation:**
+
+1. **Home first (mandatory, eviction-safety).** Register the lesson as its **own row** in the relevant domain sub-index (`index_*.md`). A `[[wiki-link]]` mention inside another lesson's row does NOT count as a home — when the cache row is later evicted, an unhomed lesson becomes grep-only.
+2. **Cross-cutting lessons need a real home.** If the lesson spans multiple families or is shared infra/tooling/credentials (e.g. decryption keys, ClickHouse access, DB-routing invariants), home it in the master index's `Cross-cutting` / pinned section — do NOT bury it under a single domain's row.
+3. **Tag importance.** Prefix each `Latest Lessons` row with `[P0]`/`[P1]`/`[P2]`. Truncation evicts the oldest **routine (`[P2]`)** row first and never drops a `[P0]`/`[P1]` to make room.
+4. **Fold homogeneous series.** If your lesson is one of a formulaic series (same template, different entity), keep a single **umbrella row** in the sub-index instead of adding a new `Latest Lessons` row per entry.
+
 ## Clean up Obsolete Information
 
 If a newly verified result conflicts with an old Lesson, **directly overwrite or delete** the obsolete rule. The knowledge base only retains current, correct conclusions.

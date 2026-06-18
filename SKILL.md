@@ -118,7 +118,14 @@ Before the implementation enters its final phase, you must read `<SKILL_DIR>/doc
 When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP. **All new lessons and project-specific scripts must be written to the discovered `PROJECT_ROOT/.agent-lessons/`.**
 
 > [!IMPORTANT]
-> **Mandatory Learning & L1 Cache Rule**: If an iteration involved complexity, difficulty, or required non-obvious infrastructure knowledge, you **MUST** record a new lesson or update an existing one. When adding a new lesson to the master index (`index.md`), you must append it to the `Latest Lessons` table but **strictly truncate the table to the 20 most recent entries**. This acts as an L1 Cache mimicking a "newer memory is more important" model, preventing index bloat while older lessons safely reside in their domain-specific sub-indexes.
+> **Mandatory Learning & L1 Cache Rule**: If an iteration involved complexity, difficulty, or required non-obvious infrastructure knowledge, you **MUST** record a new lesson or update an existing one.
+>
+> The master `index.md` `Latest Lessons` table is a **recency cache, not the system of record**. The durable home of every lesson is its **own row in a domain sub-index** (`index_*.md`) or a pinned table. When adding a lesson, follow these in order:
+> 1. **Home first, then cache.** Before (or together with) appending to `Latest Lessons`, register the lesson as its **own row** in the relevant sub-index — or, if it is cross-cutting (spans multiple families, or is shared infra/tooling/credentials), in a master-index `Cross-cutting` / pinned section. A lesson must never live *only* in `Latest Lessons`, and a `[[wiki-link]]` inside another lesson's row does **not** count as a home.
+> 2. **Importance-aware truncation.** Keep `Latest Lessons` at ~20 rows, but evict by **importance then recency**, never pure FIFO: prefix each row with `[P0]`/`[P1]`/`[P2]`, and when trimming, drop the oldest **routine (`[P2]`)** row — never push out a `[P0]`/`[P1]` to make room for routine work.
+> 3. **Fold homogeneous series.** A formulaic series (e.g. many near-identical `*_family_sbe_binding_facts`) gets **one umbrella row** in its sub-index, not N rows in `Latest Lessons`; cache at most the newest one and point to the sub-index for the rest.
+>
+> Eviction is then always **safe** (the lesson is still reachable via its sub-index home) and **importance-preserving** (a burst of routine work cannot silently flush a high-value lesson out of the cache).
 
 ---
 

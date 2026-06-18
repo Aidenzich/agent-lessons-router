@@ -56,6 +56,16 @@ You must proactively verify whether the status described in each Lesson is consi
 
 ---
 
+## Step 6: Latest-Lessons Cache Hygiene (Eviction Safety)
+
+The master `index.md` `Latest Lessons` table is a recency cache (~20 rows). Audit it every maintenance pass:
+
+1. **Orphan check (most important):** Every `Latest Lessons` row MUST also exist as its **own row** in a domain sub-index (`index_*.md`) or a pinned/cross-cutting table. A lesson that lives ONLY in `Latest Lessons`, or only as a `[[wiki-link]]` inside another row, is an orphan — give it a durable sub-index home **before** it is truncated out, otherwise it silently degrades to grep-only.
+2. **Importance-aware truncation:** When trimming to ~20, evict by **importance then recency**, not pure FIFO. Add/repair `[P0]`/`[P1]`/`[P2]` prefixes; drop the oldest **routine (`[P2]`)** row and never push out a `[P0]`/`[P1]` to keep a routine one.
+3. **Fold formulaic series:** Collapse near-identical series rows (e.g. `*_family_sbe_binding_facts`) into a single **umbrella row** in the owning sub-index, and remove the duplicates from `Latest Lessons` so a burst of one task type cannot flush the cache.
+
+---
+
 ## Execution Report
 
 After the maintenance operation is completed, output a concise maintenance summary to the human:
