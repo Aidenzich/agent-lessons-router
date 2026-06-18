@@ -42,6 +42,7 @@ Restructure the router table based on the level from Step 1:
 
 - **Level 2 (Segmented):** Use Markdown headers (like `## Database`, `## Auth`) within a single `index.md` to logically group the table.
 - **Level 3+ (Split):** Create multi-level routing. The master `index.md` only retains domain summaries and links pointing to Sub-indexes (e.g., `[Database Lessons](index_db.md)`). The Sub-index for each domain is responsible for listing specific Lesson file paths and summaries.
+- **Level 4+ (Physical domain-packages):** Once the flat `lessons/` dir is large enough that whole-dir grep pollutes context and index-only ownership drifts, move lessons into **per-domain folders** `lessons/<domain>/` (one folder per Sub-index), with cross-cutting / shared-infra lessons in `lessons/_shared/`. Then: physical location IS the ownership signal, search can be scoped to one folder, and a lesson's folder must equal its declared Sub-index domain (lint this). Migration must rewrite every `lessons/NAME.md` path ref across all indexes and lessons to `lessons/<folder>/NAME.md`; name-based `[[wiki-links]]` are unaffected. New lessons are then written straight into their domain folder, never the flat root.
 
 ---
 

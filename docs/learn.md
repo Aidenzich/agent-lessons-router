@@ -31,6 +31,8 @@ You are **obligated** to create or update a lesson if any of the following occur
 
 Create a Markdown file under `PROJECT_ROOT/.agent-lessons/lessons/`, and the naming must be specific (e.g., `stripe_webhook_idempotency.md`).
 
+**If the knowledge base uses domain-package folders** (Level 4+ — `lessons/<domain>/` each owned by a sub-index, see `maintain.md` Step 4), do NOT drop the file in the flat `lessons/` root: write it into the folder matching its sub-index (e.g. `lessons/g1/...`), and put cross-cutting / shared-infra lessons in `lessons/_shared/`. Physical location is the ownership signal — keep folder == declared domain.
+
 **Formatting Advice:** If appropriate, you can use Markdown Tables to organize information. However, please pay special attention: **when using a Table, only one `-` is needed per column separator**, for example:
 
 |-|-|-|
