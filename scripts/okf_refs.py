@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--profile",
         default=str(default_profile_path()),
-        help="ALR OKF profile contract JSON. Defaults to docs/alr-okf-profile.contract.json.",
+        help="ALR OKF profile contract YAML. Defaults to docs/alr-okf-profile.contract.yaml.",
     )
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(

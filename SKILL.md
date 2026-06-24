@@ -26,7 +26,7 @@ Please strictly follow the Standard Operating Procedure (SOP) below:
 
 ALR is an OKF-compatible Agent Memory Profile: OKF is the portable markdown plus frontmatter file format, while ALR is the consumption protocol that tells agents how to find, prioritize, route, read, write, and maintain project memory. OKF compatibility is additive and must not flatten ALR into a generic catalog or replace ALR router semantics.
 
-The authoritative profile contract lives in `docs/alr-okf-profile.contract.json`, with human-readable rules in `docs/alr-okf-profile.md`. Tools that lint, migrate, index, or round-trip ALR bundles must load that contract instead of duplicating rules from prose. Unknown OKF or ALR profile fields must be preserved, not rejected or silently discarded.
+The authoritative profile contract lives in `docs/alr-okf-profile.contract.yaml`, with human-readable rules in `docs/alr-okf-profile.md`. Tools that lint, migrate, index, or round-trip ALR bundles must load that contract instead of duplicating rules from prose. Unknown OKF or ALR profile fields must be preserved, not rejected or silently discarded.
 
 ALR indexes remain deterministic router indexes and OKF progressive-disclosure indexes. `index.md` and `index_*.md` are reserved routing files, not lesson concepts. They must preserve find-up bootstrap, P0/P1/P2 priority, domain sub-index homes, Latest Lessons as a recency cache, Learn/Maintain SOP, and the rule to consult lessons before guessing.
 

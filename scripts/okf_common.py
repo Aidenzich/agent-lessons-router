@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import fnmatch
-import json
 import os
 import re
 import sys
@@ -12,6 +11,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse, urlsplit, urlunsplit
 
+import yaml
 
 PRUNE_DIRS = {".git", "node_modules", "dist", ".agents-workspace", ".repos"}
 MARKDOWN_EXTENSIONS = {".md", ".markdown"}
@@ -38,7 +38,7 @@ class OkfUsageError(Exception):
 
 
 def default_profile_path() -> Path:
-    return Path(__file__).resolve().parents[1] / "docs" / "alr-okf-profile.contract.json"
+    return Path(__file__).resolve().parents[1] / "docs" / "alr-okf-profile.contract.yaml"
 
 
 def load_profile(path: str | Path) -> dict[str, Any]:
@@ -47,9 +47,11 @@ def load_profile(path: str | Path) -> dict[str, Any]:
         raise OkfUsageError(f"profile not found: {profile_path}")
     try:
         with profile_path.open("r", encoding="utf-8") as handle:
-            profile = json.load(handle)
-    except (OSError, json.JSONDecodeError) as exc:
-        raise OkfUsageError(f"invalid profile JSON: {profile_path}: {exc}") from exc
+            profile = yaml.safe_load(handle)
+    except (OSError, yaml.YAMLError) as exc:
+        raise OkfUsageError(f"invalid profile YAML: {profile_path}: {exc}") from exc
+    if not isinstance(profile, dict):
+        raise OkfUsageError(f"invalid profile contract: expected YAML mapping: {profile_path}")
 
     required = [
         "profile",

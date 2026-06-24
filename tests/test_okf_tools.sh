@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-valid --profile docs/alr-okf-profile.contract.json --format json >/tmp/alr-okf-valid-lint.json
-python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile docs/alr-okf-profile.contract.json --format json >/tmp/alr-okf-valid-refs.json
+python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-valid --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-valid-lint.json
+python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-valid-refs.json
 python3 - <<'PY'
 import json
 from pathlib import Path
@@ -19,12 +19,12 @@ assert "password=[REDACTED]" in refs_text
 assert "https://[REDACTED]@example.com/path" in refs_text
 PY
 
-python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-missing-type --profile docs/alr-okf-profile.contract.json --format json >/tmp/alr-okf-missing-type-lint.json
-python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-missing-type --profile docs/alr-okf-profile.contract.json --strict --format json >/tmp/alr-okf-missing-type-strict.json && exit 1 || test "$?" = "2"
+python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-missing-type --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-missing-type-lint.json
+python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-missing-type --profile docs/alr-okf-profile.contract.yaml --strict --format json >/tmp/alr-okf-missing-type-strict.json && exit 1 || test "$?" = "2"
 
-python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-broken-links --profile docs/alr-okf-profile.contract.json --format json >/tmp/alr-okf-broken-links-lint.json
-python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-broken-links --profile docs/alr-okf-profile.contract.json --strict-links --format json >/tmp/alr-okf-broken-links-strict.json && exit 1 || test "$?" = "2"
-python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-broken-links --profile docs/alr-okf-profile.contract.json --format json >/tmp/alr-okf-broken-links-refs.json
+python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-broken-links --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-broken-links-lint.json
+python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-broken-links --profile docs/alr-okf-profile.contract.yaml --strict-links --format json >/tmp/alr-okf-broken-links-strict.json && exit 1 || test "$?" = "2"
+python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-broken-links --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-broken-links-refs.json
 python3 - <<'PY'
 from pathlib import Path
 
@@ -36,9 +36,9 @@ assert "token=[REDACTED]" in lint_text
 assert "token=[REDACTED]" in refs_text
 PY
 
-python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile /tmp/alr-okf-missing-profile.contract.json --format json && exit 1 || test "$?" = "1"
-printf '{}\n' >/tmp/alr-okf-invalid-profile.contract.json
-python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile /tmp/alr-okf-invalid-profile.contract.json --format json && exit 1 || test "$?" = "1"
+python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile /tmp/alr-okf-missing-profile.contract.yaml --format json && exit 1 || test "$?" = "1"
+printf '{}\n' >/tmp/alr-okf-invalid-profile.contract.yaml
+python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile /tmp/alr-okf-invalid-profile.contract.yaml --format json && exit 1 || test "$?" = "1"
 
-python3 scripts/okf_lint.py --bundle / --profile docs/alr-okf-profile.contract.json --format json && exit 1 || test "$?" = "1"
-python3 scripts/okf_refs.py --bundle / --profile docs/alr-okf-profile.contract.json --format json && exit 1 || test "$?" = "1"
+python3 scripts/okf_lint.py --bundle / --profile docs/alr-okf-profile.contract.yaml --format json && exit 1 || test "$?" = "1"
+python3 scripts/okf_refs.py --bundle / --profile docs/alr-okf-profile.contract.yaml --format json && exit 1 || test "$?" = "1"

@@ -121,7 +121,7 @@ Historical ALR bundles are partially OKF-compatible by consumption even when ind
 
 ## Safe Tooling Rules
 
-Tools that lint, migrate, index, or expose ALR bundles must load `docs/alr-okf-profile.contract.json` first. Downstream tasks should fail fast if the contract is absent after dependency merge/adoption.
+Tools that lint, migrate, index, or expose ALR bundles must load `docs/alr-okf-profile.contract.yaml` first. Downstream tasks should fail fast if the contract is absent after dependency merge/adoption.
 
 Default safety rules:
 
