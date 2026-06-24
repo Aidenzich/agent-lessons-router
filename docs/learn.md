@@ -33,6 +33,8 @@ Create a Markdown file under `PROJECT_ROOT/.agent-lessons/lessons/`, and the nam
 
 **If the knowledge base uses domain-package folders** (Level 4+ — `lessons/<domain>/` each owned by a sub-index, see `maintain.md` Step 4), do NOT drop the file in the flat `lessons/` root: write it into the folder matching its sub-index (e.g. `lessons/g1/...`), and put cross-cutting / shared-infra lessons in `lessons/_shared/`. Physical location is the ownership signal — keep folder == declared domain.
 
+**OKF profile requirement:** New ALR lesson concept files must include YAML frontmatter with non-empty `type`. When touching an existing historical lesson that lacks frontmatter, add frontmatter before saving it unless the edit is only a mechanical path rewrite. The authoritative profile contract is `<SKILL_DIR>/docs/alr-okf-profile.contract.json`; preserve unknown OKF/ALR fields when editing.
+
 **Formatting Advice:** If appropriate, you can use Markdown Tables to organize information. However, please pay special attention: **when using a Table, only one `-` is needed per column separator**, for example:
 
 |-|-|-|
@@ -40,6 +42,18 @@ Create a Markdown file under `PROJECT_ROOT/.agent-lessons/lessons/`, and the nam
 This effectively avoids generating too many separator characters, which can lead to token waste or slow generation.
 
 ```markdown
+---
+type: Lesson
+title: [Precise Title, e.g., Stripe Webhook MUST do idempotency check]
+description: [One-sentence conclusion]
+tags: [domain, topic]
+timestamp: YYYY-MM-DD
+priority: P0|P1|P2
+domain: [owning-domain]
+index_home: index_<domain>.md
+lesson_status: active
+---
+
 # [Precise Title, e.g., Stripe Webhook MUST do idempotency check]
 
 ## Rule
@@ -78,6 +92,8 @@ After writing a Lesson, you must synchronously update `PROJECT_ROOT/.agent-lesso
 2. **Cross-cutting lessons need a real home.** If the lesson spans multiple families or is shared infra/tooling/credentials (e.g. decryption keys, ClickHouse access, DB-routing invariants), home it in the master index's `Cross-cutting` / pinned section — do NOT bury it under a single domain's row.
 3. **Tag importance.** Prefix each `Latest Lessons` row with `[P0]`/`[P1]`/`[P2]`. Truncation evicts the oldest **routine (`[P2]`)** row first and never drops a `[P0]`/`[P1]` to make room.
 4. **Fold homogeneous series.** If your lesson is one of a formulaic series (same template, different entity), keep a single **umbrella row** in the sub-index instead of adding a new `Latest Lessons` row per entry.
+
+OKF frontmatter helps portable consumers, but it does not replace ALR routing. The router table row and durable sub-index home remain the operational source of truth.
 
 ## Clean up Obsolete Information
 

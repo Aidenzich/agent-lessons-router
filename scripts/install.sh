@@ -40,6 +40,18 @@ EOF
 
 # --- 建立 lesson 模板檔 ---
 cat > "${LESSONS_DIR}/_template.md" << 'EOF'
+---
+type: Lesson
+title: "[精準標題 - 一句話說明規則]"
+description: "一句話說明可重複套用的操作規則"
+tags: []
+timestamp: "YYYY-MM-DD"
+priority: P2
+domain: "workspace"
+index_home: "index_workspace.md"
+lesson_status: draft
+---
+
 # [精準標題 — 一句話說明規則]
 
 ## Rule
