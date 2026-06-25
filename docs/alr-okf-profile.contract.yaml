@@ -54,7 +54,7 @@ concept_defaults:
   allow_missing_frontmatter_for_historical_files: true
   unknown_types: preserve-and-treat-as-generic-concepts
   unknown_fields: preserve
-alr_extensions:
+extension_fields:
   priority:
     type: string
     allowed_values:
