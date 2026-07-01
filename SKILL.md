@@ -64,9 +64,9 @@ Principle: **Knowledge stay at the highest relevant level (Lessons Root), tools 
 
 ### Search Safety Rules
 
-ALR lookup must be cheap, bounded, and deterministic. Do **not** launch broad recursive `find` commands from a monorepo/workspace root just to locate `.agent-lessons`; those scans can traverse copied workspaces, `node_modules`, `.git`, generated `dist`, and other huge dependency trees.
+ALR lookup must be cheap, bounded, and deterministic. Do **not** launch broad recursive `find` commands from a monorepo/workspace root just to locate `.agent-lessons`; those scans can traverse copied workspaces, `node_modules`, `.git`, generated `dist`, and other huge dependency trees. This includes seemingly small commands like `find .. -name .agent-lessons -type d -print` when the current directory lives inside a large workspace.
 
-Use a parent-only find-up loop for bootstrap:
+Use only a parent-only find-up loop for bootstrap:
 
 ```bash
 dir="$PWD"
@@ -91,11 +91,12 @@ Forbidden patterns:
 
 ```bash
 find /path/to/workspace -path '*/.agent-lessons/*' -print
+find .. -name .agent-lessons -type d -print
 find .. -name .agent-lessons -type d -prune
 find "$PROJECT_ROOT" -name index.md -path '*/.agent-lessons/index.md' -print
 ```
 
-When an existing automation uses broad ALR discovery, fix the automation before running another batch. Do not leave orphaned `find` processes scanning agent workspaces or dependency folders.
+If you accidentally start a broad discovery scan, stop it immediately (for example by interrupting the running tool/session) and retry with parent-only find-up. Do not wait for the broad scan to finish. When an existing automation uses broad ALR discovery, fix the automation before running another batch. Do not leave orphaned `find` processes scanning agent workspaces or dependency folders.
 
 ---
 

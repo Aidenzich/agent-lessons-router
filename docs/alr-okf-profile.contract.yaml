@@ -12,7 +12,9 @@ bundle:
     forbidden_discovery_patterns:
     - recursive-find-from-workspace-root
     - recursive-find-from-monorepo-root
+    - relative-recursive-find-from-parent
     - unbounded-search-outside-agent-lessons
+    abort_on_accidental_broad_scan: true
 reserved_index_files:
 - index.md
 - index_*.md

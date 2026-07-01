@@ -23,7 +23,7 @@ An ALR bundle root is the `.agent-lessons/` directory discovered by the ALR find
 3. Otherwise move to the parent and repeat until `/`.
 4. If no ancestor has `.agent-lessons/`, initialize in the current working directory with the ALR installer.
 
-Bootstrap tools must use parent-only find-up. Broad recursive scans from a monorepo or workspace root are not valid ALR discovery.
+Bootstrap tools must use parent-only find-up. Broad recursive scans from a monorepo or workspace root are not valid ALR discovery, including relative scans such as `find .. -name .agent-lessons -type d -print` from inside a large workspace. If a broad discovery scan is started by mistake, abort it and retry with parent-only find-up instead of waiting for it to traverse generated workspaces or dependency trees.
 
 ## File Classes
 
