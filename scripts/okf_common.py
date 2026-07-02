@@ -17,6 +17,9 @@ PRUNE_DIRS = {".git", "node_modules", "dist", ".agents-workspace", ".repos"}
 MARKDOWN_EXTENSIONS = {".md", ".markdown"}
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]\n]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 WIKI_LINK_RE = re.compile(r"\[\[([^\]\n|#]+)(?:#[^\]\n|]+)?(?:\|[^\]\n]+)?\]\]")
+# POSIX bracket classes inside regex literals ([[:space:]], [[:digit:]], ...) look
+# like wiki links to WIKI_LINK_RE; they are regex syntax, not links.
+POSIX_CLASS_RE = re.compile(r"^:[a-zA-Z]+:$")
 FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\Z)", re.S)
 BLOCK_SCALAR_MARKERS = {"|", ">", "|-", ">-", "|+", ">+"}
 SECRET_QUERY_RE = re.compile(
@@ -293,7 +296,10 @@ def extract_links(text: str) -> list[dict[str, str]]:
     for match in MARKDOWN_LINK_RE.finditer(text):
         links.append({"kind": "markdown", "target": match.group(1).strip()})
     for match in WIKI_LINK_RE.finditer(text):
-        links.append({"kind": "wiki", "target": match.group(1).strip()})
+        target = match.group(1).strip()
+        if POSIX_CLASS_RE.match(target):
+            continue
+        links.append({"kind": "wiki", "target": target})
     return links
 
 
@@ -356,6 +362,11 @@ def resolve_internal_link(root: Path, source_rel: str, target: str, md_index: di
         md_name = name + ".md"
         if md_name in md_index and len(md_index[md_name]) == 1:
             return next(iter(md_index[md_name]))
+    # Absolute paths that do not resolve inside the bundle are references to
+    # workspace files outside it (source code, docs); they are valid when the
+    # target exists on the filesystem.
+    if raw.startswith("/") and Path(raw).exists():
+        return raw
     return None
 
 
