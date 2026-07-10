@@ -129,6 +129,60 @@ tags: [settings, upsert, unique]
             result["results"][0]["path"], "lessons/workspace/backoff_ignores_reset_at.md"
         )
 
+    def test_raw_and_concept_lanes_rescue_family_fact_from_bad_anchor_top_hit(self) -> None:
+        (self.bundle / "lessons/g1").mkdir()
+        (self.bundle / "lessons/q1").mkdir()
+        (self.bundle / "lessons/g1/navigation_tables.md").write_text(
+            """---
+title: G1 navigation tables
+description: G1 has distinct navigation tables; choose by category and controller.
+---
+# Navigation
+The column navigation route is `/navigations?category=mobile` and reads `video_navigations`.
+It is not the common app navigation configuration page.
+""",
+            encoding="utf-8",
+        )
+        (self.bundle / "lessons/q1/bottom_nav_permission.md").write_text(
+            """---
+title: Q1 bottom nav modern permission mapping
+description: Q1 legacy bottom navigation has modern route and permission gaps.
+---
+# Bottom navigation
+The Q1 bottom navigation table and shared settings page need permission fixes.
+""",
+            encoding="utf-8",
+        )
+        result = ALR_RECALL.reduce_candidates(
+            self.bundle,
+            "G1 legacy 欄目導航被錯接到底部共用設定頁；真正的 table、category 與 modern route 是什麼？",
+            [
+                "G1 legacy|legacy|欄目導航",
+                "permission|table|category",
+                "底部|bottom navigation|shared settings",
+                "modern route|mapping",
+            ],
+            5,
+            None,
+        )
+        paths = [item["path"] for item in result["results"]]
+        self.assertIn("lessons/g1/navigation_tables.md", paths)
+        rescued = next(
+            item
+            for item in result["results"]
+            if item["path"] == "lessons/g1/navigation_tables.md"
+        )
+        self.assertIn("video_navigations", rescued["snippet"])
+        self.assertIn("raw_lexical", rescued["retrieval_lanes"])
+        candidates = ALR_RECALL.load_candidates(self.bundle, None)
+        document_frequency = ALR_RECALL.prepare_lexical_documents(candidates)
+        query_terms = ALR_RECALL.discriminative_query_terms(
+            "G1 navigation",
+            document_frequency,
+            len(candidates),
+        )
+        self.assertIn("g1", query_terms)
+
 
 if __name__ == "__main__":
     unittest.main()

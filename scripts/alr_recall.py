@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -58,6 +60,10 @@ STOPWORDS = {
     "with",
     "would",
 }
+MAX_LESSON_CHARS = 256 * 1024
+MAX_EVIDENCE_CHARS = 360
+BM25_K1 = 1.2
+BM25_B = 0.75
 
 
 class RecallUsageError(Exception):
@@ -77,6 +83,20 @@ class Candidate:
     index_text: str = ""
     metadata_text: str = ""
     description: str = ""
+    body_text: str = ""
+    path_terms: set[str] = field(default_factory=set)
+    metadata_terms: set[str] = field(default_factory=set)
+    match_terms: dict[str, set[str]] = field(default_factory=dict)
+    lexical_counts: Counter[str] = field(default_factory=Counter)
+    lexical_length: int = 0
+    lexical_score: float = 0.0
+    raw_lexical_score: float = 0.0
+    anchor_score: int = 0
+    anchor_rank: int | None = None
+    lexical_rank: int | None = None
+    raw_lexical_rank: int | None = None
+    retrieval_lanes: list[str] = field(default_factory=list)
+    snippet: str = ""
     score: int = 0
     matched_anchors: list[str] = field(default_factory=list)
     match_fields: dict[str, list[str]] = field(default_factory=dict)
@@ -89,20 +109,85 @@ def normalize(text: str) -> str:
     return " ".join(TOKEN_RE.findall(text))
 
 
+def latin_token_variants(token: str) -> set[str]:
+    values = {token}
+    if len(token) > 4:
+        if token.endswith("s"):
+            values.add(token[:-1])
+        if token.endswith("ed"):
+            values.add(token[:-2])
+            values.add(token[:-2] + "e")
+        if token.endswith("ing"):
+            values.add(token[:-3])
+            values.add(token[:-3] + "e")
+    return values
+
+
 def tokens(text: str) -> set[str]:
     values: set[str] = set()
     for token in TOKEN_RE.findall(normalize(text)):
-        values.add(token)
-        if re.fullmatch(r"[a-z0-9]+", token) and len(token) > 4:
-            if token.endswith("s"):
-                values.add(token[:-1])
-            if token.endswith("ed"):
-                values.add(token[:-2])
-                values.add(token[:-2] + "e")
-            if token.endswith("ing"):
-                values.add(token[:-3])
-                values.add(token[:-3] + "e")
+        if CJK_RE.search(token):
+            values.add(token)
+        else:
+            values.update(latin_token_variants(token))
     return values
+
+
+def lexical_tokens(text: str) -> list[str]:
+    values: list[str] = []
+    for token in TOKEN_RE.findall(normalize(text)):
+        if CJK_RE.search(token):
+            values.append(token)
+            for size in (2, 3):
+                if len(token) >= size:
+                    values.extend(token[index : index + size] for index in range(len(token) - size + 1))
+        else:
+            values.extend(sorted(latin_token_variants(token)))
+    return values
+
+
+def prepare_lexical_documents(candidates: dict[str, Candidate]) -> dict[str, int]:
+    document_frequency: Counter[str] = Counter()
+    for candidate in candidates.values():
+        candidate.path_terms = set(lexical_tokens(candidate.path_text))
+        candidate.metadata_terms = set(lexical_tokens(candidate.metadata_text))
+        candidate.match_terms = {
+            "path": tokens(candidate.path_text),
+            "index": tokens(candidate.index_text),
+            "metadata": tokens(candidate.metadata_text),
+        }
+        source = " ".join(
+            (
+                candidate.path_text,
+                candidate.index_text,
+                candidate.metadata_text,
+                candidate.body_text,
+            )
+        )
+        candidate.lexical_counts = Counter(lexical_tokens(source))
+        candidate.lexical_length = sum(candidate.lexical_counts.values())
+        document_frequency.update(candidate.lexical_counts.keys())
+    return dict(document_frequency)
+
+
+def discriminative_query_terms(
+    query: str,
+    document_frequency: dict[str, int],
+    document_count: int,
+) -> set[str]:
+    acronyms = {normalize(value) for value in re.findall(r"\b[A-Z]{2,6}\b", query)}
+    rare_threshold = max(3, math.ceil(document_count * 0.02))
+    selected: set[str] = set()
+    for token in lexical_tokens(query):
+        if token in STOPWORDS or token in GENERIC_TERMS:
+            continue
+        is_cjk = bool(CJK_RE.search(token))
+        is_technical_short = bool(re.fullmatch(r"[a-z]+\d+[a-z0-9]*", token))
+        is_acronym = token in acronyms
+        is_rare = document_frequency.get(token, 0) <= rare_threshold
+        if is_cjk or len(token) > 3 or is_technical_short or is_acronym or (len(token) >= 2 and is_rare):
+            selected.add(token)
+    return selected
 
 
 def parse_anchor(raw: str) -> Anchor:
@@ -133,17 +218,16 @@ def detect_language(text: str) -> str:
 
 
 def strip_markdown(text: str) -> str:
-    text = re.sub(r"[`*_#]", "", text)
+    text = re.sub(r"[`*#]", "", text)
     text = re.sub(r"\[([^]]+)]\([^)]*\)", r"\1", text)
     return " ".join(text.split())
 
 
-def frontmatter_summary(path: Path) -> tuple[str, str]:
+def read_lesson(path: Path) -> tuple[str, str, str]:
     try:
-        with path.open("r", encoding="utf-8") as handle:
-            text = handle.read(8192)
+        text = path.read_text(encoding="utf-8")[:MAX_LESSON_CHARS]
     except (OSError, UnicodeDecodeError):
-        return "", ""
+        return "", "", ""
 
     fields: list[str] = []
     description = ""
@@ -162,7 +246,8 @@ def frontmatter_summary(path: Path) -> tuple[str, str]:
         lines = [strip_markdown(line) for line in body.splitlines() if strip_markdown(line)]
         description = " ".join(lines[:2])[:360]
         fields.extend(lines[:2])
-    return " ".join(fields), description[:360]
+    body = text[match.end() :] if match else text
+    return " ".join(fields), description[:MAX_EVIDENCE_CHARS], body
 
 
 def load_candidates(bundle: Path, domain: str | None) -> dict[str, Candidate]:
@@ -177,12 +262,13 @@ def load_candidates(bundle: Path, domain: str | None) -> dict[str, Candidate]:
         relative = path.relative_to(bundle).as_posix()
         if not relative.startswith(domain_prefix):
             continue
-        metadata_text, description = frontmatter_summary(path)
+        metadata_text, description, body_text = read_lesson(path)
         candidates[relative] = Candidate(
             path=relative,
             path_text=normalize(relative.removeprefix("lessons/").removesuffix(".md")),
             metadata_text=normalize(metadata_text),
             description=description,
+            body_text=body_text,
         )
 
     for index_path in sorted(bundle.glob("index*.md")):
@@ -223,6 +309,53 @@ def query_identifiers(query: str) -> list[str]:
     return list(dict.fromkeys(normalize(value) for value in values if normalize(value)))
 
 
+def score_lexical_candidates(
+    candidates: dict[str, Candidate],
+    query_terms: set[str],
+    document_frequency: dict[str, int],
+    score_attribute: str = "lexical_score",
+) -> None:
+    document_count = len(candidates)
+    average_length = (
+        sum(candidate.lexical_length for candidate in candidates.values()) / document_count
+        if document_count
+        else 1.0
+    )
+    for candidate in candidates.values():
+        score = 0.0
+        for term in query_terms:
+            frequency = candidate.lexical_counts.get(term, 0)
+            if not frequency:
+                continue
+            frequency_in_documents = document_frequency.get(term, 0)
+            inverse_document_frequency = math.log(
+                1 + (document_count - frequency_in_documents + 0.5) / (frequency_in_documents + 0.5)
+            )
+            length_ratio = candidate.lexical_length / average_length if average_length else 0.0
+            denominator = frequency + BM25_K1 * (1 - BM25_B + BM25_B * length_ratio)
+            score += inverse_document_frequency * frequency * (BM25_K1 + 1) / denominator
+            if term in candidate.path_terms:
+                score += inverse_document_frequency * 1.5
+            elif term in candidate.metadata_terms:
+                score += inverse_document_frequency * 0.5
+        setattr(candidate, score_attribute, score)
+
+
+def evidence_snippet(candidate: Candidate, query_terms: set[str]) -> str:
+    best_line = ""
+    best_score = 0
+    for line in candidate.body_text.splitlines():
+        cleaned = strip_markdown(line)
+        if not cleaned:
+            continue
+        overlap = query_terms & set(lexical_tokens(cleaned))
+        score = len(overlap)
+        if score > best_score:
+            best_line = cleaned
+            best_score = score
+    return (best_line or candidate.description)[:MAX_EVIDENCE_CHARS]
+
+
 def score_candidate(
     candidate: Candidate,
     anchors: list[Anchor],
@@ -243,7 +376,14 @@ def score_candidate(
         best_field = None
         best_alternative = None
         for field_name, field_text in fields.items():
-            alternative = matching_alternative(anchor, field_text)
+            alternative = next(
+                (
+                    item
+                    for item in anchor.alternatives
+                    if alternative_matches(item, field_text, candidate.match_terms[field_name])
+                ),
+                None,
+            )
             if alternative and (best_field is None or field_weights[field_name] > field_weights[best_field]):
                 best_field = field_name
                 best_alternative = alternative
@@ -260,8 +400,8 @@ def score_candidate(
     overlap_weights = {"path": 3, "index": 1, "metadata": 1}
     query_overlap: dict[str, list[str]] = {}
     overlap_score = 0
-    for field_name, field_text in fields.items():
-        overlap = sorted(query_terms & tokens(field_text))
+    for field_name in fields:
+        overlap = sorted(query_terms & candidate.match_terms[field_name])
         if overlap:
             query_overlap[field_name] = overlap
             overlap_score += len(overlap) * overlap_weights[field_name]
@@ -272,11 +412,74 @@ def score_candidate(
         score += 20
     elif coverage >= 2:
         score += 6
+    candidate.anchor_score = score
     candidate.score = score
     candidate.matched_anchors = matched
     candidate.match_fields = match_fields
     candidate.query_overlap = query_overlap
     return candidate
+
+
+def rank_candidates(
+    candidates: dict[str, Candidate],
+    evidence_terms: set[str],
+    limit: int,
+) -> list[Candidate]:
+    anchor_ranked = [candidate for candidate in candidates.values() if candidate.matched_anchors]
+    anchor_ranked.sort(
+        key=lambda item: (-item.anchor_score, -len(item.matched_anchors), item.path)
+    )
+    lexical_ranked = [candidate for candidate in candidates.values() if candidate.lexical_score > 0]
+    lexical_ranked.sort(key=lambda item: (-item.lexical_score, item.path))
+    raw_lexical_ranked = [
+        candidate for candidate in candidates.values() if candidate.raw_lexical_score > 0
+    ]
+    raw_lexical_ranked.sort(key=lambda item: (-item.raw_lexical_score, item.path))
+
+    for rank, candidate in enumerate(anchor_ranked, 1):
+        candidate.anchor_rank = rank
+    for rank, candidate in enumerate(lexical_ranked, 1):
+        candidate.lexical_rank = rank
+    for rank, candidate in enumerate(raw_lexical_ranked, 1):
+        candidate.raw_lexical_rank = rank
+
+    # Interleave independent lanes so a bad query compilation cannot erase
+    # the strongest raw-query candidate, while anchors still supply semantic aliases.
+    selected: list[Candidate] = []
+    seen: set[str] = set()
+    lane_positions = {"concept_lexical": 0, "anchor": 0, "raw_lexical": 0}
+    lanes = (
+        ("raw_lexical", raw_lexical_ranked),
+        ("concept_lexical", lexical_ranked),
+        ("anchor", anchor_ranked),
+    )
+    while len(selected) < limit:
+        progressed = False
+        for lane_name, ranked in lanes:
+            position = lane_positions[lane_name]
+            while position < len(ranked) and ranked[position].path in seen:
+                position += 1
+            lane_positions[lane_name] = position + 1
+            if position >= len(ranked):
+                continue
+            candidate = ranked[position]
+            candidate.retrieval_lanes.append(lane_name)
+            candidate.snippet = evidence_snippet(candidate, evidence_terms)
+            selected.append(candidate)
+            seen.add(candidate.path)
+            progressed = True
+            if len(selected) >= limit:
+                break
+        if not progressed:
+            break
+
+    for candidate in selected:
+        candidate.score = (
+            round(candidate.lexical_score * 100)
+            + round(candidate.raw_lexical_score * 25)
+            + candidate.anchor_score
+        )
+    return selected
 
 
 def reduce_candidates(
@@ -292,30 +495,43 @@ def reduce_candidates(
         raise RecallUsageError("--limit must be between 1 and 10")
     anchors = [parse_anchor(value) for value in anchor_values]
     identifiers = query_identifiers(query)
-    query_terms = {
-        token
-        for token in tokens(query)
-        if len(token) > 3 and token not in STOPWORDS and token not in GENERIC_TERMS
-    }
     candidates = load_candidates(bundle, domain)
-    scored = [
-        score_candidate(candidate, anchors, identifiers, query_terms)
-        for candidate in candidates.values()
-    ]
-    scored = [candidate for candidate in scored if candidate.matched_anchors]
-    scored.sort(key=lambda item: (-item.score, -len(item.matched_anchors), item.path))
+    document_frequency = prepare_lexical_documents(candidates)
+    raw_query_terms = discriminative_query_terms(query, document_frequency, len(candidates))
+    concept_query = " ".join(anchor.raw.replace("|", " ") for anchor in anchors)
+    concept_query_terms = discriminative_query_terms(
+        concept_query, document_frequency, len(candidates)
+    )
+    score_lexical_candidates(
+        candidates,
+        raw_query_terms,
+        document_frequency,
+        score_attribute="raw_lexical_score",
+    )
+    score_lexical_candidates(candidates, concept_query_terms, document_frequency)
+    for candidate in candidates.values():
+        score_candidate(candidate, anchors, identifiers, raw_query_terms)
+    ranked = rank_candidates(candidates, raw_query_terms | concept_query_terms, limit)
 
     results = []
-    for candidate in scored[:limit]:
+    for candidate in ranked:
         results.append(
             {
                 "path": candidate.path,
                 "score": candidate.score,
+                "anchor_score": candidate.anchor_score,
+                "lexical_score": round(candidate.lexical_score, 4),
+                "raw_lexical_score": round(candidate.raw_lexical_score, 4),
+                "anchor_rank": candidate.anchor_rank,
+                "lexical_rank": candidate.lexical_rank,
+                "raw_lexical_rank": candidate.raw_lexical_rank,
+                "retrieval_lanes": candidate.retrieval_lanes,
                 "coverage": f"{len(candidate.matched_anchors)}/{len(anchors)}",
                 "matched_anchors": candidate.matched_anchors,
                 "match_fields": candidate.match_fields,
                 "query_overlap": candidate.query_overlap,
                 "description": candidate.description,
+                "snippet": candidate.snippet,
             }
         )
     anchor_languages = sorted({detect_language(anchor.raw) for anchor in anchors})
