@@ -6,7 +6,8 @@ description: |
 
   You must understand that ALR (Agent Lessons Router) lessons SUPERSEDE your internal memory. ALR serves as the authoritative, project-level knowledge base. Because ALR lessons are shared across all agents and utilize deterministic index routing, they are structurally stronger, permanent, and vastly superior to ephemeral memory for enforcing system architecture and preventing regressions.
 
-tags: [workflow, architecture, knowledge-base, memory, alr, ddd, debugging, SOP, parity]
+metadata:
+  tags: [workflow, architecture, knowledge-base, memory, alr, ddd, debugging, SOP, parity]
 
 ---
 
@@ -90,6 +91,10 @@ find "$PROJECT_ROOT/.agent-lessons" \
 Forbidden patterns:
 
 ```bash
+rg --files "$PROJECT_ROOT/.agent-lessons"
+rg --files .
+sed -n '1,220p' "$PROJECT_ROOT/.agent-lessons/index.md"
+sed -n '1,260p' "$PROJECT_ROOT/.agent-lessons/index_workspace.md"
 find /path/to/workspace -path '*/.agent-lessons/*' -print
 find .. -name .agent-lessons -type d -print
 find .. -name .agent-lessons -type d -prune
@@ -98,21 +103,44 @@ find "$PROJECT_ROOT" -name index.md -path '*/.agent-lessons/index.md' -print
 
 If you accidentally start a broad discovery scan, stop it immediately (for example by interrupting the running tool/session) and retry with parent-only find-up. Do not wait for the broad scan to finish. When an existing automation uses broad ALR discovery, fix the automation before running another batch. Do not leave orphaned `find` processes scanning agent workspaces or dependency folders.
 
+`rg --files` is an inventory command, not a recall command. Use it only when the user explicitly asks for corpus inventory or file enumeration, and scope it to the smallest known domain. Likewise, do not read a fixed large prefix of an index just because it exists: large router indexes are lookup tables, not onboarding documents.
+
 ---
 
 ## Phase 1: Recall & Retrieve (Pre-task & Troubleshooting)
 
-Before starting to write code or debug, **and immediately upon any command failure or technical block**, you must check if there are any related historical experiences in the **discovered `PROJECT_ROOT`**:
+Before starting to write code or debug, **and immediately upon any command failure or technical block**, check for relevant history in the discovered `PROJECT_ROOT` using this narrow-first procedure:
 
-1. **Read the Router Table:** Start by reading `PROJECT_ROOT/.agent-lessons/index.md` to get the big picture.
-2. **Domain-Specific Indexes:** Pay attention to any `index_*.md` files (e.g., `index_g1.md`, `index_workspace.md`). These sub-indexes contain highly dense, domain-specific experiences.
-3. **Keyword & Topic Matching:** Based on your current task (e.g., Trello/Gitea integration, G1 parity), identify and read the `index_*.md` file that is **closest to your objective**.
-4. **On-Demand Reading (Progressive Disclosure):** From the chosen index, explicitly read the full content of relevant lesson files. Treat them as the highest priority architectural constraints.
-5. **Skip if No Records:** If no relevant records exist across all indexes, it is unexplored territory. Do not read irrelevant files.
-5. **Fallback Sequentially To:** 
-   - The most recent agent-facing project
-   - Guidance repo-local skills / tool config
-   - Source structure
+1. **Form discriminative terms:** Extract 2-4 specific concepts, identifiers, error phrases, or paired relationships from the task. For cross-lingual queries, add concise English aliases while preserving literal identifiers. Use at most four regex alternatives, and require every alternative to combine at least two concepts. Never append a generic standalone branch such as `stale`, `build`, `service`, or `error`.
+2. **Search router indexes only:** Search `index.md` and `index_*.md` with a bounded, high-precision expression. Prefer paired/conjunctive concepts such as `reset.*backoff|backoff.*reset`; globally display at most 60 lines, because `rg -m` limits per file rather than across all indexes.
+3. **Follow concrete paths immediately:** If router output contains a specific `lessons/<domain>/<name>.md` path whose row matches the task, read that lesson before any wider search. Do not continue searching merely because several other rows also matched.
+4. **Choose one domain index:** If no decisive path appears, select the closest `index_<domain>.md`. Read only matching rows plus small context, not a fixed 200+ line prefix.
+5. **Read decisive lessons:** Open the 1-3 strongest lesson candidates in full. Follow an explicit lesson reference when it is more specific than another broad search.
+6. **Stop when supported:** Once a decisive lesson answers the task and its scope matches, stop recall. Do not keep searching to fill a candidate quota.
+7. **Widen one step at a time:** Widen only when the current step produced no adequate concrete lesson path. Relax one constraint or search the selected domain's lessons with the same paired-concept rule. Search all lesson domains only as the final ALR fallback.
+8. **Fallback outside ALR:** If no relevant record exists after bounded widening, continue sequentially to the most recent agent-facing project guidance, repo-local skills/tool config, then source structure. Do not read irrelevant lessons.
+
+Preferred command shape:
+
+```bash
+ALR="$PROJECT_ROOT/.agent-lessons"
+rg -n -i -C 2 -m 8 --glob 'index*.md' \
+  'rate.?limit.*(reset|backoff)|(reset|backoff).*rate.?limit' "$ALR" \
+  | sed -n '1,60p'
+rg -n -i -C 2 -m 20 \
+  'app.*header|database.*routing' "$ALR/index_q1.md"
+cat "$ALR/lessons/<domain>/<lesson>.md"
+```
+
+Recall anti-patterns:
+
+- Listing every lesson before forming a query (`rg --files .`).
+- Reading the first 220/260 lines of large indexes without a matched section.
+- One giant OR query combining generic words such as `build|host|service|process|runtime|...`.
+- Adding a generic standalone branch to an otherwise precise query, such as `reset.*backoff|backoff.*reset|stale`.
+- Searching every domain before trying the router indexes and closest domain index.
+- Continuing to search a whole domain after router output already exposed a task-matching lesson path.
+- Continuing after the decisive lesson is verified merely to collect more sources.
 
 ---
 
