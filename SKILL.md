@@ -113,6 +113,7 @@ Before starting to write code or debug, **and immediately upon any command failu
 
 1. **Compile concept groups once:** Extract 2-5 discriminative concept groups. Cover every material query clause: entity/component, operation/mechanism, and relation/outcome. Put original-language and concise target-language implementation alternatives in the same group, preserving literal identifiers. Example: `本地記憶|local memory|memory runtime`. Do not spend separate tool calls on each language, omit the entity anchor, or replace a predictive/contrast relation with a generic cost term.
 2. **Run the stateless reducer:** Call `<SKILL_DIR>/scripts/alr_recall.py` once with the original query and repeated `--anchor` groups. It scans lesson paths, router rows, and frontmatter summaries locally, then returns at most five candidates; it does not build a database, read lesson bodies, or emit the raw corpus inventory.
+   - Treat exit 0 plus valid JSON as a successful, trusted result. Never repeat an identical reducer call, inspect/debug the reducer source, change `TMPDIR`, or probe the Python runtime after success.
 3. **Accept candidates by coverage, not rank alone:** Read at most one candidate whose description directly covers the query's material clauses. If every candidate covers fewer than half the anchors or clearly misses the entity/relation, do not read a body; correct the anchors and make at most one more reducer call.
 4. **Stop after direct support:** Once the read lesson directly supports every material clause, answer immediately. Do not run confirmatory `rg`, read sibling lessons, or search for the user's exact wording.
 5. **Use native fallback only when needed:** Only after two inadequate reducer calls, use one precise filtered-filename or router-index search. Select the closest `index_<domain>.md`; read only matching rows plus small context, not a fixed 200+ line prefix.
@@ -151,6 +152,7 @@ Recall anti-patterns:
 - Reading multiple candidate bodies before checking the reducer's highest-coverage path.
 - Reading a low-coverage candidate whose description does not cover the entity and relation.
 - Running confirmatory searches after a direct lesson already answers every query clause.
+- Re-running or debugging a successful reducer invocation instead of consuming its candidates.
 - Reading the first 220/260 lines of large indexes without a matched section.
 - One giant OR query combining generic words such as `build|host|service|process|runtime|...`.
 - Adding a generic standalone branch to an otherwise precise query, such as `reset.*backoff|backoff.*reset|stale`.
