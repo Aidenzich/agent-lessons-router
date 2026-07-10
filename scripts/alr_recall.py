@@ -30,6 +30,34 @@ GENERIC_TERMS = {
     "task",
     "test",
 }
+STOPWORDS = {
+    "about",
+    "after",
+    "again",
+    "also",
+    "been",
+    "before",
+    "does",
+    "from",
+    "have",
+    "into",
+    "many",
+    "more",
+    "only",
+    "should",
+    "that",
+    "their",
+    "then",
+    "there",
+    "these",
+    "they",
+    "this",
+    "what",
+    "when",
+    "which",
+    "with",
+    "would",
+}
 
 
 class RecallUsageError(Exception):
@@ -52,15 +80,29 @@ class Candidate:
     score: int = 0
     matched_anchors: list[str] = field(default_factory=list)
     match_fields: dict[str, list[str]] = field(default_factory=dict)
+    query_overlap: dict[str, list[str]] = field(default_factory=dict)
 
 
 def normalize(text: str) -> str:
+    text = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", text)
     text = text.casefold().replace("_", " ").replace("-", " ").replace("/", " ")
     return " ".join(TOKEN_RE.findall(text))
 
 
 def tokens(text: str) -> set[str]:
-    return set(TOKEN_RE.findall(normalize(text)))
+    values: set[str] = set()
+    for token in TOKEN_RE.findall(normalize(text)):
+        values.add(token)
+        if re.fullmatch(r"[a-z0-9]+", token) and len(token) > 4:
+            if token.endswith("s"):
+                values.add(token[:-1])
+            if token.endswith("ed"):
+                values.add(token[:-2])
+                values.add(token[:-2] + "e")
+            if token.endswith("ing"):
+                values.add(token[:-3])
+                values.add(token[:-3] + "e")
+    return values
 
 
 def parse_anchor(raw: str) -> Anchor:
@@ -181,7 +223,12 @@ def query_identifiers(query: str) -> list[str]:
     return list(dict.fromkeys(normalize(value) for value in values if normalize(value)))
 
 
-def score_candidate(candidate: Candidate, anchors: list[Anchor], identifiers: list[str]) -> Candidate:
+def score_candidate(
+    candidate: Candidate,
+    anchors: list[Anchor],
+    identifiers: list[str],
+    query_terms: set[str],
+) -> Candidate:
     fields = {
         "path": candidate.path_text,
         "index": candidate.index_text,
@@ -210,6 +257,16 @@ def score_candidate(candidate: Candidate, anchors: list[Anchor], identifiers: li
         if identifier in combined:
             score += 20
 
+    overlap_weights = {"path": 3, "index": 1, "metadata": 1}
+    query_overlap: dict[str, list[str]] = {}
+    overlap_score = 0
+    for field_name, field_text in fields.items():
+        overlap = sorted(query_terms & tokens(field_text))
+        if overlap:
+            query_overlap[field_name] = overlap
+            overlap_score += len(overlap) * overlap_weights[field_name]
+    score += min(overlap_score, 18)
+
     coverage = len(matched)
     if coverage == len(anchors):
         score += 20
@@ -218,6 +275,7 @@ def score_candidate(candidate: Candidate, anchors: list[Anchor], identifiers: li
     candidate.score = score
     candidate.matched_anchors = matched
     candidate.match_fields = match_fields
+    candidate.query_overlap = query_overlap
     return candidate
 
 
@@ -234,8 +292,16 @@ def reduce_candidates(
         raise RecallUsageError("--limit must be between 1 and 10")
     anchors = [parse_anchor(value) for value in anchor_values]
     identifiers = query_identifiers(query)
+    query_terms = {
+        token
+        for token in tokens(query)
+        if len(token) > 3 and token not in STOPWORDS and token not in GENERIC_TERMS
+    }
     candidates = load_candidates(bundle, domain)
-    scored = [score_candidate(candidate, anchors, identifiers) for candidate in candidates.values()]
+    scored = [
+        score_candidate(candidate, anchors, identifiers, query_terms)
+        for candidate in candidates.values()
+    ]
     scored = [candidate for candidate in scored if candidate.matched_anchors]
     scored.sort(key=lambda item: (-item.score, -len(item.matched_anchors), item.path))
 
@@ -248,6 +314,7 @@ def reduce_candidates(
                 "coverage": f"{len(candidate.matched_anchors)}/{len(anchors)}",
                 "matched_anchors": candidate.matched_anchors,
                 "match_fields": candidate.match_fields,
+                "query_overlap": candidate.query_overlap,
                 "description": candidate.description,
             }
         )

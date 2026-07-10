@@ -103,6 +103,32 @@ tags: [settings, upsert, unique]
                 self.bundle, "query", ["memory runtime", "queue worker"], 11, None
             )
 
+    def test_query_relation_breaks_anchor_coverage_tie(self) -> None:
+        (self.bundle / "lessons/workspace/backoff_countdown.md").write_text(
+            "---\ntitle: Backoff countdown\ndescription: Show resetAt and stale countdown.\n---\n",
+            encoding="utf-8",
+        )
+        (self.bundle / "lessons/workspace/backoff_ignores_reset_at.md").write_text(
+            "---\ntitle: Backoff ignores resetAt\ndescription: Fixed sleep ignores provider reset epoch and goes stale.\n---\n",
+            encoding="utf-8",
+        )
+        (self.bundle / "index_workspace.md").write_text(
+            (self.bundle / "index_workspace.md").read_text()
+            + "| `lessons/workspace/backoff_countdown.md` | Backoff resetAt stale countdown. |\n"
+            + "| `lessons/workspace/backoff_ignores_reset_at.md` | Backoff ignores provider resetAt and goes stale. |\n",
+            encoding="utf-8",
+        )
+        result = ALR_RECALL.reduce_candidates(
+            self.bundle,
+            "Rate-limit backoff ignores the provider reset timestamp and gets stuck stale",
+            ["rate limit|backoff", "provider reset|resetAt", "stale countdown|stale"],
+            5,
+            None,
+        )
+        self.assertEqual(
+            result["results"][0]["path"], "lessons/workspace/backoff_ignores_reset_at.md"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
