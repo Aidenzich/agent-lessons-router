@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+python3 -m unittest tests/test_alr_recall.py
+
 python3 scripts/okf_lint.py --bundle tests/fixtures/alr-okf-valid --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-valid-lint.json
 python3 scripts/okf_refs.py --bundle tests/fixtures/alr-okf-valid --profile docs/alr-okf-profile.contract.yaml --format json >/tmp/alr-okf-valid-refs.json
 python3 - <<'PY'

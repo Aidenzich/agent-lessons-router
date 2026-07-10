@@ -103,27 +103,39 @@ find "$PROJECT_ROOT" -name index.md -path '*/.agent-lessons/index.md' -print
 
 If you accidentally start a broad discovery scan, stop it immediately (for example by interrupting the running tool/session) and retry with parent-only find-up. Do not wait for the broad scan to finish. When an existing automation uses broad ALR discovery, fix the automation before running another batch. Do not leave orphaned `find` processes scanning agent workspaces or dependency folders.
 
-`rg --files` is an inventory command, not a recall command. Use it only when the user explicitly asks for corpus inventory or file enumeration, and scope it to the smallest known domain. Likewise, do not read a fixed large prefix of an index just because it exists: large router indexes are lookup tables, not onboarding documents.
+Raw `rg --files` output is inventory, not recall. Never print it into model context. A precise, bounded filename pipeline is allowed because lesson slugs are semantic summaries: `rg --files "$ALR/lessons" | rg -i '<paired-pattern>' | sed -n '1,12p'`. Likewise, do not read a fixed large prefix of an index just because it exists: large router indexes are lookup tables, not onboarding documents.
 
 ---
 
 ## Phase 1: Recall & Retrieve (Pre-task & Troubleshooting)
 
-Before starting to write code or debug, **and immediately upon any command failure or technical block**, check for relevant history in the discovered `PROJECT_ROOT` using this narrow-first procedure:
+Before starting to write code or debug, **and immediately upon any command failure or technical block**, check for relevant history in the discovered `PROJECT_ROOT` using this reducer-first procedure:
 
-1. **Form discriminative terms:** Extract 2-4 specific concepts, identifiers, error phrases, or paired relationships from the task. For cross-lingual queries, add concise English aliases while preserving literal identifiers. Use at most four regex alternatives, and require every alternative to combine at least two concepts. Never append a generic standalone branch such as `stale`, `build`, `service`, or `error`.
-2. **Search router indexes only:** Search `index.md` and `index_*.md` with a bounded, high-precision expression. Prefer paired/conjunctive concepts such as `reset.*backoff|backoff.*reset`; globally display at most 60 lines, because `rg -m` limits per file rather than across all indexes.
-3. **Follow concrete paths immediately:** If router output contains a specific `lessons/<domain>/<name>.md` path whose row matches the task, read that lesson before any wider search. Do not continue searching merely because several other rows also matched.
-4. **Choose one domain index:** If no decisive path appears, select the closest `index_<domain>.md`. Read only matching rows plus small context, not a fixed 200+ line prefix.
-5. **Read decisive lessons:** Open the 1-3 strongest lesson candidates in full. Follow an explicit lesson reference when it is more specific than another broad search.
-6. **Stop when supported:** Once a decisive lesson answers the task and its scope matches, stop recall. Do not keep searching to fill a candidate quota.
-7. **Widen one step at a time:** Widen only when the current step produced no adequate concrete lesson path. Relax one constraint or search the selected domain's lessons with the same paired-concept rule. Search all lesson domains only as the final ALR fallback.
-8. **Fallback outside ALR:** If no relevant record exists after bounded widening, continue sequentially to the most recent agent-facing project guidance, repo-local skills/tool config, then source structure. Do not read irrelevant lessons.
+1. **Compile concept groups once:** Extract 2-5 discriminative concept groups. Cover every material query clause: entity/component, operation/mechanism, and relation/outcome. Put original-language and concise target-language implementation alternatives in the same group, preserving literal identifiers. Example: `本地記憶|local memory|memory runtime`. Do not spend separate tool calls on each language, omit the entity anchor, or replace a predictive/contrast relation with a generic cost term.
+2. **Run the stateless reducer:** Call `<SKILL_DIR>/scripts/alr_recall.py` once with the original query and repeated `--anchor` groups. It scans lesson paths, router rows, and frontmatter summaries locally, then returns at most five candidates; it does not build a database, read lesson bodies, or emit the raw corpus inventory.
+3. **Accept candidates by coverage, not rank alone:** Read at most one candidate whose description directly covers the query's material clauses. If every candidate covers fewer than half the anchors or clearly misses the entity/relation, do not read a body; correct the anchors and make at most one more reducer call.
+4. **Stop after direct support:** Once the read lesson directly supports every material clause, answer immediately. Do not run confirmatory `rg`, read sibling lessons, or search for the user's exact wording.
+5. **Use native fallback only when needed:** Only after two inadequate reducer calls, use one precise filtered-filename or router-index search. Select the closest `index_<domain>.md`; read only matching rows plus small context, not a fixed 200+ line prefix.
+6. **Widen one step at a time:** Widen only when the reducer and precise fallback produced no adequate concrete lesson path. Relax one constraint or search the selected domain's lessons with the same paired-concept rule. Search all lesson domains only as the final ALR fallback.
+7. **Fallback outside ALR:** If no relevant record exists after bounded widening, continue sequentially to the most recent agent-facing project guidance, repo-local skills/tool config, then source structure. Do not read irrelevant lessons.
 
 Preferred command shape:
 
 ```bash
 ALR="$PROJECT_ROOT/.agent-lessons"
+python3 <SKILL_DIR>/scripts/alr_recall.py \
+  --bundle "$ALR" \
+  --query '<original user problem>' \
+  --anchor '本地記憶|local memory|memory runtime' \
+  --anchor '寫入|store|persist' \
+  --anchor '查詢|recall|lookup' \
+  --anchor '佇列|queue|worker' \
+  --limit 5
+
+# Fallback only when the reducer has no adequate candidate.
+rg --files "$ALR/lessons" \
+  | rg -i 'memory.*(store|recall)|(store|recall).*memory' \
+  | sed -n '1,12p'
 rg -n -i -C 2 -m 8 --glob 'index*.md' \
   'rate.?limit.*(reset|backoff)|(reset|backoff).*rate.?limit' "$ALR" \
   | sed -n '1,60p'
@@ -134,7 +146,11 @@ cat "$ALR/lessons/<domain>/<lesson>.md"
 
 Recall anti-patterns:
 
-- Listing every lesson before forming a query (`rg --files .`).
+- Printing every lesson before forming a query (`rg --files .` without a precise bounded filter).
+- Running separate original-language and translated searches instead of one multilingual reducer call.
+- Reading multiple candidate bodies before checking the reducer's highest-coverage path.
+- Reading a low-coverage candidate whose description does not cover the entity and relation.
+- Running confirmatory searches after a direct lesson already answers every query clause.
 - Reading the first 220/260 lines of large indexes without a matched section.
 - One giant OR query combining generic words such as `build|host|service|process|runtime|...`.
 - Adding a generic standalone branch to an otherwise precise query, such as `reset.*backoff|backoff.*reset|stale`.
