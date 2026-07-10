@@ -23,11 +23,11 @@ class AlrRecallTest(unittest.TestCase):
         self.bundle = Path(self.temp.name)
         (self.bundle / "lessons/workspace").mkdir(parents=True)
         (self.bundle / "lessons/_shared").mkdir(parents=True)
-        (self.bundle / "lessons/workspace/msai_memup_local_memory_runtime_usage.md").write_text(
+        (self.bundle / "lessons/workspace/local_indexed_memory_runtime_usage.md").write_text(
             """---
-title: msai-memup local memory runtime usage
+title: Local indexed memory runtime usage
 description: Store writes queue intents; drain them with a worker before recall can find them.
-tags: [memup, local-memory, queue, recall]
+tags: [indexed-memory, local-memory, queue, recall]
 ---
 # Runtime
 """,
@@ -46,7 +46,7 @@ tags: [settings, upsert, unique]
         (self.bundle / "index_workspace.md").write_text(
             """| File | Description |
 |-|-|
-| `lessons/workspace/msai_memup_local_memory_runtime_usage.md` | Local memory store queues writes; worker drain makes recall visible. |
+| `lessons/workspace/local_indexed_memory_runtime_usage.md` | Local memory store queues writes; worker drain makes recall visible. |
 | `lessons/_shared/site_config_unique_key.md` | Setting upsert requires owner/module/section/key UNIQUE. |
 """,
             encoding="utf-8",
@@ -70,7 +70,7 @@ tags: [settings, upsert, unique]
         )
         self.assertEqual(
             result["results"][0]["path"],
-            "lessons/workspace/msai_memup_local_memory_runtime_usage.md",
+            "lessons/workspace/local_indexed_memory_runtime_usage.md",
         )
         self.assertEqual(result["results"][0]["coverage"], "4/4")
 
