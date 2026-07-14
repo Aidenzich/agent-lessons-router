@@ -67,8 +67,12 @@ lesson_status: active
 ## Why (Optional)
 <!-- Only write if the reason is not obvious. Limit to 1-2 sentences. -->
 
+## Related (Mandatory when a related lesson exists)
+<!-- [[wiki-link]] every EXISTING lesson that shares this one's subsystem, mechanism, or failure-mode, each with a ≤1-line note on how it differs/relates. See "Link Related Lessons" below. If genuinely none exists, omit the section. -->
+<!-- Example: "- [[loop_manager_ratelimit_backoff_ignores_resetsat]] — dispatcher-level backoff (different layer than this harness-level gap)." -->
+
 ## Refs (Optional)
-<!-- Related file paths or links, as a pure list without explanatory text. -->
+<!-- Non-lesson pointers only: source file paths, URLs, tickets. A pure list without explanatory text. Lesson-to-lesson links belong in Related, not here. -->
 
 ## Updated
 <!-- YYYY-MM-DD -->
@@ -78,6 +82,17 @@ lesson_status: active
 - ❌ Lengthy Context / Background stories ("We were doing project X back then, and because of requirement Y...")
 - ❌ A chronological log of the exploration process ("First tried A, didn't work, then tried B...")
 - ❌ Obvious conclusions ("Testing is important", "Read the documentation")
+
+## Link Related Lessons (Mandatory)
+
+A lesson is a node in a knowledge graph, not an island. Before finalizing, you **must** connect it to what already exists:
+
+1. **Find neighbors.** Run one ALR recall (`alr_recall.py`) with the new lesson's core concepts to surface existing lessons that share its **subsystem, mechanism, or failure-mode**. (You already did a Consolidation check for *merge* candidates; this is the same search reused for *linking* the ones too distinct to merge.)
+2. **Link them in `## Related`.** For every highly-related existing lesson, add a `[[wiki-link]]` in the new lesson's `## Related` section with a ≤1-line note on how it **differs or relates** (same layer? sibling bug? opposite side of a contrast? prerequisite?). A bare link with no distinction note is not enough — the note is what stops a future agent from conflating two adjacent lessons.
+3. **Backlink (bidirectional).** If a neighbor is close enough that an agent reading *it* would also want *this* one, add a reciprocal `[[wiki-link]]` into that neighbor's `## Related`/`Don't` line. Cross-links must not be one-way, or half the graph is undiscoverable from the other half.
+4. **Scope discipline.** Link only genuinely related lessons (shared entity/mechanism/failure-mode). Do NOT spray links to loosely-topical or same-domain-but-unrelated lessons — link spam is as harmful as no links. If truly nothing is related, omit `## Related` (do not invent neighbors).
+
+Note: `[[wiki-link]]` uses the target lesson's **file name** (slug), and is unaffected by later folder migrations. A `## Related` link is a navigation aid; it still does NOT count as the target's durable home (see the Router Table rules below).
 
 ## Update the Router Table
 
