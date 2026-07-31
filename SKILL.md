@@ -2,7 +2,10 @@
 name: agent-lessons-router
 description: |
   CRITICAL DIRECTIVE: Knowledge Persistence & Routing & Memory Management
-  Always prioritize writing project experiences, environment variables configs like git token , PR, operational rules, and known pitfalls (gotchas) to the .agent-lessons/ directory as physical files. Do NOT rely solely on your internal memory.
+  Persist verified project experiences, operational rules, and known pitfalls (gotchas) to the
+  .agent-lessons/ directory at the terminal authoring gate. During active work, retain candidate
+  lessons only in task context; do not publish provisional conclusions. Do NOT rely solely on your
+  internal memory after the task is ready for handoff.
 
   You must understand that ALR (Agent Lessons Router) lessons SUPERSEDE your internal memory. ALR serves as the authoritative, project-level knowledge base. Because ALR lessons are shared across all agents and utilize deterministic index routing, they are structurally stronger, permanent, and vastly superior to ephemeral memory for enforcing system architecture and preventing regressions.
 
@@ -169,6 +172,11 @@ Recall anti-patterns:
 
 Before the implementation enters its final phase, you must read `<SKILL_DIR>/docs/retro.md` and forcibly engage in self-review (or initiate a Subagent for review). This phase aims to combat "Happy Path" blind spots and ensure the modifications fully align with the user's deep intentions and the project's edge conditions. If any discrepancies are found, you must immediately rework and fix them.
 
+Phase 2 may identify candidate lessons, but it must not publish new lessons or ordinary lesson
+updates while findings or required work remain. Keep candidates in task context until review passes.
+The only mid-task persistence exception is an independently verified correction to an existing
+active lesson whose stale rule could continue to mislead agents.
+
 ---
 
 ## Phase 3: Learn & Write (Post-task)
@@ -176,7 +184,13 @@ Before the implementation enters its final phase, you must read `<SKILL_DIR>/doc
 When the review passes, the task is fully completed, and there is a need to record the experience, read `<SKILL_DIR>/docs/learn.md` and follow its complete writing SOP. **All new lessons and project-specific scripts must be written to the discovered `PROJECT_ROOT/.agent-lessons/`.**
 
 > [!IMPORTANT]
-> **Mandatory Learning & L1 Cache Rule**: If an iteration involved complexity, difficulty, or required non-obvious infrastructure knowledge, you **MUST** record a new lesson or update an existing one.
+> **Terminal Authoring Gate**: Complexity determines whether learning is mandatory at handoff; it
+> does not authorize mid-task persistence. Do not modify lesson files, router indexes, or derived
+> memory stores while implementation, required verification, review findings, or rework remain.
+> An explicit human request to record now and an independently verified urgent correction to a
+> stale active lesson are the only exceptions.
+>
+> **Mandatory Learning & L1 Cache Rule**: If a completed iteration involved complexity, difficulty, or required non-obvious infrastructure knowledge, you **MUST** record a new lesson or update an existing one before final handoff.
 >
 > The master `index.md` `Latest Lessons` table is a **recency cache, not the system of record**. The durable home of every lesson is its **own row in a domain sub-index** (`index_*.md`) or a pinned table. When adding a lesson, follow these in order:
 > 1. **Home first, then cache.** Before (or together with) appending to `Latest Lessons`, register the lesson as its **own row** in the relevant sub-index — or, if it is cross-cutting (spans multiple families, or is shared infra/tooling/credentials), in a master-index `Cross-cutting` / pinned section. A lesson must never live *only* in `Latest Lessons`, and a `[[wiki-link]]` inside another lesson's row does **not** count as a home.

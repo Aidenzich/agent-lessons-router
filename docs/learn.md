@@ -2,29 +2,69 @@
 
 We refuse the accumulation of errors, and we refuse the accumulation of nonsense. Every Lesson must be a **highly precise conclusion that can be directly executed**, rather than a lengthy story or background description.
 
-## Writing Prerequisite (Gatekeeper)
+## Terminal Authoring Gate (Gatekeeper)
 
-A lesson can only be written if **any one** of the following conditions is met:
-- The code has passed tests (CI/Tests Passed).
-- A human explicitly instructed: "Record this down", "Remember this gotcha", or used the `/learn` command.
-- **Complexity/Difficulty Encountered**: The task took more than one try, involved non-obvious infrastructure knowledge, or required a significant architectural pivot.
+For new lessons and ordinary updates, timing and worthiness are separate gates. Both must pass.
+
+### 1. Timing gate
+
+Persist a lesson only when one of these is true:
+
+- **Terminal handoff:** the requested deliverable is complete, required verification and review have
+  passed, and no known finding or rework remains.
+- **Explicit human instruction:** the user says to record the conclusion now or invokes `/learn`.
+- **Verified urgent correction:** an existing active lesson has been independently proven stale or
+  unsafe, and leaving it active could continue to mislead this or another agent.
+
+Passing one focused test, completing one phase, encountering a retry, or discovering a plausible
+gotcha does **not** make an active task terminal. While work remains, retain proposed lessons only as
+candidate notes in task context or the working plan. Do not write a draft lesson, update router
+indexes, or synchronize a derived memory store.
+
+For a genuinely ended or blocked task, a verified durable finding may be written at handoff, but an
+unresolved hypothesis may not. State the evidence boundary precisely.
+
+### 2. Worthiness gate
+
+After the timing gate passes, write only when **any one** of these is true:
+
+- The completed and verified work produced a durable, non-obvious operational conclusion.
+- A human explicitly instructed: "Record this down", "Remember this gotcha", or used `/learn`.
+- **Complexity/Difficulty Encountered**: the completed task took more than one try, involved
+  non-obvious infrastructure knowledge, or required a significant architectural pivot.
+
+Tests passing support the conclusion, but are not by themselves a reason to create a lesson and do
+not override the timing gate.
 
 ### Mandatory Correction Obligation
 
-If an Agent follows a Lesson but encounters errors or discovers that the information is stale/incorrect during execution, **that Agent has an absolute obligation to immediately correct or update said Lesson**. We must maintain a "self-healing" knowledge base.
+If an Agent follows a Lesson and independently proves during execution that the active rule is
+stale or unsafe, **that Agent has an absolute obligation to correct it without waiting for ordinary
+post-task authoring**. This exception is narrow:
+
+- Persist only the verified correction, not the surrounding unresolved diagnosis.
+- Preserve the evidence boundary and correction lineage.
+- Re-run the relevant retrieval or read-back check after the correction.
+- If the lesson is merely incomplete, ambiguous, or suspected, keep a candidate note and wait for
+  the terminal handoff gate.
+
+We must maintain a self-healing knowledge base without publishing provisional conclusions.
 
 ### Consolidation Principle (Anti-Sprawl)
 
 Before creating a new Lesson, you must first check if a similar or related Lesson already exists. **Prioritize updating and expanding existing Lessons** rather than creating new, fragmented files for highly homogeneous content. Aim for fewer, higher-quality, and more comprehensive Lesson "pillars".
 ### The Complexity Threshold (Mandatory Learning)
 
-You are **obligated** to create or update a lesson if any of the following occurred:
+At terminal handoff, you are **obligated** to create or update a lesson if any of the following occurred:
 1. **Multiple Attempts**: You had to refine your approach because the first attempt failed or was suboptimal.
 2. **Hidden Gotchas**: You discovered a constraint that wasn't documented in the source but required investigation (e.g., hidden environment variables, specific version quirks).
 3. **Infrastructure Magic**: You had to use specific terminal commands or scripts that are not part of the standard `npm/make` workflow.
 4. **Architectural Pivots**: You chose one design pattern over another for a specific reason that might affect future stability.
 
 **Rule of thumb:** If the next agent would likely spend more than 2 minutes "figuring it out" without your notes, it belongs in a Lesson.
+
+This threshold decides whether a completed task must teach ALR. It never authorizes writing while
+implementation, verification, review, or rework is still active.
 
 
 ### Formatting Guidelines
